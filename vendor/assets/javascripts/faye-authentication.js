@@ -16,7 +16,3 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
   else
     callback(message);
 };
-
-FayeAuthentication.prototype.incoming = function(message, callback) {
-  callback(message);
-};
