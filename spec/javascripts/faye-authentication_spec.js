@@ -96,13 +96,13 @@ describe('faye-authentication', function() {
 
       })
 
-      it('should make two ajax calls when dealing with two channels', function() {
+      it('should make two ajax calls when dealing with two channels', function(done) {
         this.client.subscribe('/foo');
         this.client.publish('/foo', {text: 'hallo'});
         this.client.publish('/foo', {text: 'hallo'});
 
         this.client.subscribe('/bar');
-        this.client.publish('/far', {text: 'hallo'});
+        this.client.publish('/bar', {text: 'hallo'});
         this.client.publish('/bar', {text: 'hallo'});
 
         setTimeout(function() {

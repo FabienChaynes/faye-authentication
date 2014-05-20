@@ -4,7 +4,8 @@ module Faye
   module Authentication
 
     def self.sign(message, secret)
-      OpenSSL::HMAC.hexdigest('sha1', secret, "#{message['channel']}-#{message['clientId']}")
+      channel = message['subscription'] || message['channel']
+      OpenSSL::HMAC.hexdigest('sha1', secret, "#{channel}-#{message['clientId']}")
     end
 
     def self.valid?(message, secret)

@@ -10,12 +10,17 @@
 #
 
 require 'faye'
+require 'faye/authentication/extension'
 require 'rack'
+
+FAYE_SECRET_KEY = 'macaroni'
 
 # Start faye web server.
 fork do
     Faye::WebSocket.load_adapter('thin')
-   Rack::Handler::Thin.run Faye::RackAdapter.new(:mount => '/faye'), :Port => 9296
+    faye = Faye::RackAdapter.new(:mount => '/faye')
+    faye.add_extension Faye::Authentication::Extension.new(FAYE_SECRET_KEY)
+   Rack::Handler::Thin.run faye, :Port => 9296
 end.tap do |id|
   parent = $$
   at_exit {
