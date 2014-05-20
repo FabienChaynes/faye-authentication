@@ -4,11 +4,13 @@ module Faye
   module Authentication
 
     def self.sign(message, secret)
-      OpenSSL::HMAC.hexdigest('sha1', secret, "#{message[:channel]}-#{message[:clientId]}")
+      OpenSSL::HMAC.hexdigest('sha1', secret, "#{message['channel']}-#{message['clientId']}")
     end
 
     def self.valid?(message, secret)
-      secure_compare(message.delete(:signature), sign(message, secret))
+      signature = message.delete('signature')
+      return false unless signature
+      secure_compare(signature, sign(message, secret))
     end
 
     # constant-time comparison algorithm to prevent timing attacks
