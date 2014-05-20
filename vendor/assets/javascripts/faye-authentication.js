@@ -7,38 +7,39 @@ FayeAuthentication.prototype.endpoint = function() {
   return (this._endpoint);
 };
 
-FayeAuthentication.prototype.getSignatureFor = function(message, callback) {
-  var channel = message.channel;
+FayeAuthentication.prototype.signMessage = function(message, callback) {
+  var channel = message.subscription || message.channel;
   var clientId = message.clientId;
 
   if (!this._signatures[clientId])
     this._signatures[clientId] = {};
-  if (this._signatures[clientId][channel])
-    callback(this._signatures[clientId][channel]);
-  else {
+  if (this._signatures[clientId][channel]) {
+    self._signatures[clientId][channel].then(function(message) {
+      callback(message);
+    });
+  } else {
     var self = this;
-    $.post(this.endpoint(), {channel: channel, clientId: clientId}, function(response) {
-      self._signatures[clientId][channel] = response.signature;
-      callback(response.signature);
-    }, 'json').fail(function(xhr, textStatus, e) {
-      callback(null, textStatus);
+    self._signatures[clientId][channel] = new Faye.Promise(function(success, failure) {
+      $.post(self.endpoint(), {channel: channel, clientId: clientId}, function(response) {
+        message.signature = response.signature;
+        success(message);
+      }, 'json').fail(function(xhr, textStatus, e) {
+        message.error = textStatus;
+        success(message);
+      });
+    });
+    self._signatures[clientId][channel].then(function(message) {
+      callback(message);
     });
   }
 }
 
 FayeAuthentication.prototype.outgoing = function(message, callback) {
   if (message.channel === '/meta/subscribe') {
-    var self = this;
-    this.getSignatureFor(message, function(signature, error) {
-      if (signature !== null) {
-        message.signature = signature;
-        callback(message);
-      }
-      else {
-        message.error = error;
-        callback(message);
-      }
-    });
+    this.signMessage(message, callback);
+  }
+  else if (/^\/meta\/(.*)/.exec(message.channel) === null) { // Publish
+    this.signMessage(message, callback);
   }
   else
     callback(message);
