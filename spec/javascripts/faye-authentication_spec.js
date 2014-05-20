@@ -33,7 +33,33 @@ describe('faye-authentication', function() {
         var request = jasmine.Ajax.requests.mostRecent();
         expect(request.url).toBe(self.auth.endpoint());
         done();
-      }, 500);
+      }, 1000);
+    });
+
+    it('should add the signature to the message', function(done) {
+
+      jasmine.Ajax.stubRequest('/faye/auth').andReturn({
+        'responseText': '{"signature": "foobarsignature"}'
+      });
+
+      var fake_transport = {connectionType: "fake", endpoint: {}, send: function() {}};
+      spyOn(fake_transport, 'send');
+
+      var self = this;
+
+      this.client.handshake(function() {
+        self.client._transport = fake_transport
+        self.client.subscribe('/foobar');
+      }, this.client);
+
+      setTimeout(function() {
+        var calls = fake_transport.send.calls.all();
+        var last_call = calls[calls.length - 1];
+        var message = last_call.args[0].message;
+        expect(message.channel).toBe('/meta/subscribe');
+        expect(message.signature).toBe('foobarsignature');
+        done();
+      }, 1000);
 
     });
 

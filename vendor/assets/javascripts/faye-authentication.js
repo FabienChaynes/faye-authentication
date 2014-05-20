@@ -11,6 +11,9 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
     $.post(this.endpoint(), message, function(response) {
       message.signature = response.signature;
       callback(message);
+    }, 'json').fail(function(xhr, textStatus, e) {
+      message.error = textStatus;
+      callback(message);
     });
   }
   else
