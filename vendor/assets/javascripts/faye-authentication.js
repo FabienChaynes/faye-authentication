@@ -7,7 +7,7 @@ FayeAuthentication.prototype.endpoint = function() {
 };
 
 FayeAuthentication.prototype.outgoing = function(message, callback) {
-  if (message.channel == '/meta/subscribe') {
+  if (message.channel === '/meta/subscribe') {
     $.post(this.endpoint(), message, function(response) {
       message.signature = response.signature;
       callback(message);
