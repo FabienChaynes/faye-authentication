@@ -1,4 +1,4 @@
-# Faye::Authentication [![Build Status](https://travis-ci.org/josevalim/rails-footnotes.svg?branch=master)](https://travis-ci.org/josevalim/rails-footnotes) [![Code Climate](https://codeclimate.com/github/dimelo/faye-authentication.png)](https://codeclimate.com/github/dimelo/faye-authentication) 
+# Faye::Authentication [![Build Status](https://travis-ci.org/josevalim/rails-footnotes.svg?branch=master)](https://travis-ci.org/josevalim/rails-footnotes) [![Code Climate](https://codeclimate.com/github/dimelo/faye-authentication.png)](https://codeclimate.com/github/dimelo/faye-authentication)
 
 Authentification implementation for faye
 
@@ -79,6 +79,15 @@ def auth
   end
 end
 
+````
+
+### Faye server extension
+
+Instanciate the extension with your secret key and add it to the server :
+
+````ruby
+server = Faye::RackAdapter.new(:mount => '/faye', :timeout => 15)
+server.add_extension Faye::Authentication::Extension.new('your private key')
 ````
 
 ## Contributing
