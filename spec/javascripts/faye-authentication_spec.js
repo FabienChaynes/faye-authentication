@@ -36,6 +36,19 @@ describe('faye-authentication', function() {
       }, 500);
     });
 
+    it('should make an ajax request with the correct params', function(done) {
+      this.client.subscribe('/foobar');
+      var self = this;
+      setTimeout(function() {
+        var request = jasmine.Ajax.requests.mostRecent();
+        console.log(request);
+        expect(request.data().channel[0]).toBe('/meta/subscribe');
+        expect(request.data().subscription[0]).toBe('/foobar');
+        done();
+      }, 500);
+    });
+
+
     describe('signature', function() {
 
       beforeEach(function() {
