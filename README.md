@@ -1,4 +1,4 @@
-# Faye::Authentication
+# Faye::Authentication [![Build Status](https://travis-ci.org/josevalim/rails-footnotes.svg?branch=master)](https://travis-ci.org/josevalim/rails-footnotes) [![Code Climate](https://codeclimate.com/github/dimelo/faye-authentication.png)](https://codeclimate.com/github/dimelo/faye-authentication) 
 
 Authentification implementation for faye
 
