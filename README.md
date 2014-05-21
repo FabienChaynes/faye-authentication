@@ -73,7 +73,7 @@ Example (For a Rails application)
 ````ruby
 def auth
   if current_user.can?(:read, params[:message][:channel])
-    render json: {signature: Faye::Authentication.sign(message, 'your private key')}
+    render json: {signature: Faye::Authentication.sign(params[:message], 'your private key')}
   else
     render json: {error: 'Not authorized'}, status: 403
   end
