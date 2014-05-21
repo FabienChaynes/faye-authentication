@@ -10,7 +10,7 @@
 #
 
 require 'faye'
-require 'faye/authentication/extension'
+require 'faye/authentication'
 require 'rack'
 
 FAYE_SECRET_KEY = 'macaroni'
