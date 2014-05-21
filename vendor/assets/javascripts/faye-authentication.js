@@ -43,3 +43,9 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
   else
     callback(message);
 };
+
+FayeAuthentication.prototype.incoming = function(message, callback) {
+  if (message.error === 'Invalid signature')
+    this._signatures = {};
+  callback(message);
+};

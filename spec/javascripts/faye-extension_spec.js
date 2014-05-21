@@ -24,7 +24,8 @@ describe('Faye extension', function() {
 
   describe('With extension', function() {
     beforeEach(function() {
-      this.client.addExtension(new FayeAuthentication());
+      this.extension = new FayeAuthentication();
+      this.client.addExtension(this.extension);
     });
 
     function stubSignature(context, callback) {
@@ -55,6 +56,19 @@ describe('Faye extension', function() {
           done();
         });
       });
+    });
+
+    it('clears the signatures when receiving an error from the server', function(done) {
+      this.extension._signatures = {'123': []};
+      jasmine.Ajax.stubRequest('/faye/auth').andReturn({
+        'responseText': '{"signature": "bad"}'
+      });
+      var self = this;
+      this.client.subscribe('/toto').then(undefined, function() {
+        expect(Object.keys(self.extension._signatures).length).toBe(0);
+        done();
+      });
+
     });
   });
 });
