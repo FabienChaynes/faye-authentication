@@ -24,7 +24,6 @@ FayeAuthentication.prototype.signMessage = function(message, callback) {
         message.signature = response.signature;
         success(message);
       }, 'json').fail(function(xhr, textStatus, e) {
-        message.error = textStatus;
         success(message);
       });
     });
