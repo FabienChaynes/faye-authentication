@@ -42,8 +42,7 @@ describe('faye-authentication', function() {
       setTimeout(function() {
         var request = jasmine.Ajax.requests.mostRecent();
         console.log(request);
-        expect(request.data().channel[0]).toBe('/meta/subscribe');
-        expect(request.data().subscription[0]).toBe('/foobar');
+        expect(request.data()['message[channel]'][0]).toBe('/foobar');
         done();
       }, 500);
     });

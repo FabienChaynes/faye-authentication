@@ -9,9 +9,12 @@ module Faye
       end
 
       def incoming(message, callback)
-        channel = message['channel']
-        if channel == '/meta/subscribe' || !(channel =~ /^\/meta\/.*/)
-          unless Faye::Authentication::valid?(message, @secret)
+        if message['channel'] == '/meta/subscribe' || !(message['channel'] =~ /^\/meta\/.*/)
+          unless Faye::Authentication.valid?({
+            'channel'   => message['subscription'] || message['channel'],
+            'clientId'  => message['clientId'],
+            'signature' => message['signature']
+            }, @secret)
             message['error'] = 'Invalid signature'
           end
         end

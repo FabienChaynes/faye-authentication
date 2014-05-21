@@ -20,7 +20,7 @@ FayeAuthentication.prototype.signMessage = function(message, callback) {
   } else {
     var self = this;
     self._signatures[clientId][channel] = new Faye.Promise(function(success, failure) {
-      $.post(self.endpoint(), message, function(response) {
+      $.post(self.endpoint(), {message: {channel: channel, clientId: clientId}}, function(response) {
         message.signature = response.signature;
         success(message);
       }, 'json').fail(function(xhr, textStatus, e) {
