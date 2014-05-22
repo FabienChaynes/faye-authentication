@@ -1,5 +1,6 @@
 require "faye/authentication/version"
 require 'faye/authentication/extension'
+require 'faye/authentication/http_client'
 require 'faye/authentication/engine'
 
 module Faye

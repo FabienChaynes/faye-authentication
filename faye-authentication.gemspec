@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Faye::Authentication::VERSION
   spec.authors       = ["Adrien Siami"]
   spec.email         = ["adrien.siami@dimelo.com"]
-  spec.summary       = 
+  spec.summary       =
   spec.description   = "A faye extension to add authentication mechanisms"
   spec.homepage      = "https://github.com/dimelo/faye-authentication"
   spec.license       = "MIT"
@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'faye', '~> 1.0'
   spec.add_development_dependency 'rack', '~> 1.5'
   spec.add_development_dependency 'thin', '~> 1.6'
+  spec.add_development_dependency 'webmock', '~> 1.18'
 end
