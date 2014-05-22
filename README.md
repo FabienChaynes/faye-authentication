@@ -85,7 +85,7 @@ A Ruby HTTP Client is also available for publishing messages to your faye server
 without the hassle of using EventMachine :
 
 ````ruby
-Faye::Authentication::HTTPClient.publish('/channel', 'data', 'your private key')
+Faye::Authentication::HTTPClient.publish('http://localhost:9290/faye', '/channel', 'data', 'your private key')
 ````
 
 ### Faye server extension
