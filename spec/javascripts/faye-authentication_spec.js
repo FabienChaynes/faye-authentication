@@ -96,6 +96,29 @@ describe('faye-authentication', function() {
         }, 500);
       });
 
+      it('preserves messages integrity', function(done) {
+        var self = this;
+
+        this.client.handshake(function() {
+          self.client._transport = self.fake_transport
+          self.client.publish('/foo', {text: 'hallo'});
+          self.client.subscribe('/foo');
+        }, this.client);
+
+        setTimeout(function() {
+          var calls = self.fake_transport.send.calls.all();
+          var subscribe_call = calls[calls.length - 1];
+          var publish_call = calls[calls.length - 2];
+          var subscribe_message = subscribe_call.args[0].message;
+          var publish_message = publish_call.args[0].message;
+          expect(publish_message.channel).toBe('/foo');
+          expect(subscribe_message.channel).toBe('/meta/subscribe');
+          expect(publish_message.signature).toBe('foobarsignature');
+          expect(subscribe_message.signature).toBe('foobarsignature');
+          done();
+        }, 500);
+      });
+
       it('should make only one ajax call when dealing with one channel', function(done) {
         this.client.subscribe('/foobar');
         this.client.publish('/foobar', {text: 'hallo'});

@@ -14,20 +14,21 @@ FayeAuthentication.prototype.signMessage = function(message, callback) {
   if (!this._signatures[clientId])
     this._signatures[clientId] = {};
   if (this._signatures[clientId][channel]) {
-    self._signatures[clientId][channel].then(function(message) {
+    this._signatures[clientId][channel].then(function(signature) {
+      message.signature = signature;
       callback(message);
     });
   } else {
     var self = this;
     self._signatures[clientId][channel] = new Faye.Promise(function(success, failure) {
       $.post(self.endpoint(), {message: {channel: channel, clientId: clientId}}, function(response) {
-        message.signature = response.signature;
-        success(message);
+        success(response.signature);
       }, 'json').fail(function(xhr, textStatus, e) {
-        success(message);
+        success(null);
       });
     });
-    self._signatures[clientId][channel].then(function(message) {
+    self._signatures[clientId][channel].then(function(signature) {
+      message.signature = signature;
       callback(message);
     });
   }
