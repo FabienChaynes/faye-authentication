@@ -3,7 +3,7 @@ module Faye
     class Extension
 
       def initialize(secret)
-        @secret = secret
+        @secret = secret.to_s
       end
 
       def incoming(message, callback)
