@@ -2,18 +2,24 @@
 
 Authentification implementation for faye
 
+## Principle
+
+This project implements (channel,client_id) authentication on channel subscription and publication and delegate it to an external HTTP endpoint through HMAC tupple signature based on a shared secret key between Faye server and the endpoint.
+
+On channel subscription the JS client performe an Ajax Call to an HTTP endpoint (JQuery needed) to be granted a signature that will be provided to Faye Server to connect and publish to channel.
+
+This signature is required and valid for each channel and client id tupple and rely on HMAC for security.
+ 
+The Faye server will verify the (channel,client_id) tupple signature and reject the message if the signature 
+is incorrect or not present.
+
+## Current support
+
 Currently Implemented :
   - Javascript Client Extention
-  - Ruby Server Extension
-  - Ruby utils for signing messages
+  - Ruby Faye Server Extension
+  - Ruby utils to signing messages in your webapp
   - **Want another one ? Pull requests are welcome.**
-
-The authentication is performed through an Ajax Call to the webserver (JQuery needed).
-
-For each channel and client id pair, a signature is added to the message.
-
-Thanks to a shared key, the Faye Server will check the signature and reject the
-message if the signature is incorrect or not present.
 
 ## Installation
 
@@ -31,26 +37,9 @@ Or install it yourself as:
 
 ## Usage
 
-### Javascript client extension
+### Authentication endpoint requirements
 
-Add the extension to your faye client :
-
-````javascript
-var client = new Faye.Client('http://my.server/faye');
-client.add_extension(new FayeAuthentication());
-````
-
-By default, when sending a subscribe request or publishing a message, the extension
-will issue an AJAX request to ``/faye/auth``
-
-If you wish to change the endpoint, you can supply it as the first argument of the extension constructor :
-
-    client.add_extension(new FayeAuthentication('/my_custom_auth_endpoint'));
-
-
-### Ruby utils
-
-The endpoint will a POST request, and shall return a JSON hash with a ``signature`` key.
+The endpoint will receive a POST request, and shall return a JSON hash with a ``signature`` key.
 
 The parameters sent to the endpoint are the following :
 
@@ -73,7 +62,7 @@ Example (For a Rails application)
 ````ruby
 def auth
   if current_user.can?(:read, params[:message][:channel])
-    render json: {signature: Faye::Authentication.sign(params[:message], 'your private key')}
+    render json: {signature: Faye::Authentication.sign(params[:message], 'your shared secret key')}
   else
     render json: {error: 'Not authorized'}, status: 403
   end
@@ -87,6 +76,21 @@ without the hassle of using EventMachine :
 ````ruby
 Faye::Authentication::HTTPClient.publish('http://localhost:9290/faye', '/channel', 'data', 'your private key')
 ````
+### Javascript client extension
+
+Add the extension to your faye client :
+
+````javascript
+var client = new Faye.Client('http://my.server/faye');
+client.add_extension(new FayeAuthentication());
+````
+
+By default, when sending a subscribe request or publishing a message, the extension
+will issue an AJAX request to ``/faye/auth``
+
+If you wish to change the endpoint, you can supply it as the first argument of the extension constructor :
+
+    client.add_extension(new FayeAuthentication('/my_custom_auth_endpoint'));
 
 ### Faye server extension
 
@@ -94,7 +98,7 @@ Instanciate the extension with your secret key and add it to the server :
 
 ````ruby
 server = Faye::RackAdapter.new(:mount => '/faye', :timeout => 15)
-server.add_extension Faye::Authentication::Extension.new('your private key')
+server.add_extension Faye::Authentication::Extension.new('your shared secret key')
 ````
 
 ## Contributing
