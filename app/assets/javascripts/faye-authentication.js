@@ -35,10 +35,10 @@ FayeAuthentication.prototype.signMessage = function(message, callback) {
 }
 
 FayeAuthentication.prototype.outgoing = function(message, callback) {
-  if (message.channel === '/meta/subscribe') {
+  if (message.channel == '/meta/subscribe') {
     this.signMessage(message, callback);
   }
-  else if (/^\/meta\/(.*)/.exec(message.channel) === null) { // Publish
+  else if (!/^\/meta\/(.*)/.test(message.channel)) { // Publish
     this.signMessage(message, callback);
   }
   else
@@ -46,7 +46,7 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
 };
 
 FayeAuthentication.prototype.incoming = function(message, callback) {
-  if (message.error === 'Invalid signature')
+  if (message.error == 'Invalid signature')
     this._signatures = {};
   callback(message);
 };
