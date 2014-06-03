@@ -6,7 +6,7 @@ Authentification implementation for faye
 
 This project implements (channel,client_id) authentication on channel subscription and publication and delegate it to an external HTTP endpoint through HMAC tupple signature based on a shared secret key between Faye server and the endpoint.
 
-On channel subscription the JS client performe an Ajax Call to an HTTP endpoint (JQuery needed) to be granted a signature that will be provided to Faye Server to connect and publish to channel.
+On channel subscription the JS client performe an Ajax Call to an HTTP endpoint to be granted a signature that will be provided to Faye Server to connect and publish to channel. The authentication of the endpoint itself is up to you but in the general case this will be a session authenticated resource of your app and you will decide to provide the signature or not depending on your own business logic. 
 
 This signature is required and valid for each channel and client id tupple and rely on HMAC for security.
  
@@ -16,7 +16,7 @@ is incorrect or not present.
 ## Current support
 
 Currently Implemented :
-  - Javascript Client Extention
+  - Javascript Client Extention (JQuery needed)
   - Ruby Faye Server Extension
   - Ruby utils to signing messages in your webapp
   - **Want another one ? Pull requests are welcome.**
