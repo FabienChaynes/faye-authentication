@@ -8,17 +8,21 @@ module Faye
 
       def incoming(message, callback)
         if message['channel'] == '/meta/subscribe' || !(message['channel'] =~ /^\/meta\/.*/)
-          unless Faye::Authentication.valid?({
-            'channel'   => message['subscription'] || message['channel'],
-            'clientId'  => message['clientId'],
-            'signature' => message['signature']
-            }, @secret)
-            message['error'] = 'Invalid signature'
+          begin
+            Faye::Authentication.validate(message['signature'], 
+                                          message['subscription'] || message['channel'], 
+                                          message['clientId'],
+                                          @secret)
+          rescue AuthError => exception
+            message['error'] = case exception
+              when ExpiredError then 'Expired signature'
+              when PayloadError then 'Required argument not signed'
+              else 'Invalid signature'
+              end
           end
         end
         callback.call(message)
       end
-
     end
   end
 end

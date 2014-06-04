@@ -1,4 +1,4 @@
-require 'openssl'
+require 'jwt'
 require 'faye/authentication/version'
 require 'faye/authentication/extension'
 require 'faye/authentication/http_client'
@@ -6,28 +6,28 @@ require 'faye/authentication/engine'
 
 module Faye
   module Authentication
+    class AuthError < StandardError; end
+    class ExpiredError < AuthError; end
+    class PayloadError < AuthError; end
 
-    def self.sign(message, secret)
-      OpenSSL::HMAC.hexdigest('sha1', secret, "#{message['channel']}-#{message['clientId']}")
+    # Return jwt signature, pass hash of payload including channel and client_id 
+    def self.sign(payload, secret, expire_at: Time.now + 12*3600, algorithm: 'HS256')
+      JWT.encode(payload.merge(exp: expire_at.to_i), secret, algorithm)
     end
 
-    def self.valid?(message, secret)
-      signature = message.delete('signature')
-      return false unless signature
-      secure_compare(signature, sign(message, secret))
+    # Return signed payload or raise
+    def self.decode(signature, secret)
+      payload, _ = JWT.decode(signature, secret) rescue raise(AuthError)
+      raise ExpiredError if Time.at(payload['exp'].to_i) < Time.now
+      payload
     end
 
-    # constant-time comparison algorithm to prevent timing attacks
-    # Copied from ActiveSupport::MessageVerifier
-    def self.secure_compare(a, b)
-      return false unless a.bytesize == b.bytesize
-
-      l = a.unpack "C#{a.bytesize}"
-
-      res = 0
-      b.each_byte { |byte| res |= byte ^ l.shift }
-      res == 0
+    # Return true if signature is valid and correspond to channel and clientId or raise
+    def self.validate(signature, channel, clientId, secret)
+      payload = self.decode(signature, secret)
+      raise PayloadError if channel.to_s.empty? || clientId.to_s.empty?
+      raise PayloadError unless channel == payload['channel'] && clientId == payload['clientId']
+      true
     end
-
   end
 end
