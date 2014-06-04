@@ -41,7 +41,6 @@ describe('faye-authentication', function() {
       var self = this;
       setTimeout(function() {
         var request = jasmine.Ajax.requests.mostRecent();
-        console.log(request);
         expect(request.data()['message[channel]'][0]).toBe('/foobar');
         done();
       }, 500);
