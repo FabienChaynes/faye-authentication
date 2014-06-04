@@ -23,12 +23,12 @@ describe Faye::Authentication do
     end
 
     it 'raises error if the expiry is in the past' do
-      signature = Faye::Authentication.sign(message, secret, expire_at: Time.now - 1)
+      signature = Faye::Authentication.sign(message, secret, expires_at: Time.now - 1)
       expect { Faye::Authentication.decode(signature, secret) }.to raise_error(Faye::Authentication::ExpiredError)
     end
 
     it 'return the payload if the expiry is in the future' do
-      signature = Faye::Authentication.sign(message, secret, expire_at: Time.now + 10)
+      signature = Faye::Authentication.sign(message, secret, expires_at: Time.now + 10)
       expect { Faye::Authentication.decode(signature, secret) }.not_to raise_error
     end
   end

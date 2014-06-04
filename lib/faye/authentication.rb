@@ -11,8 +11,9 @@ module Faye
     class PayloadError < AuthError; end
 
     # Return jwt signature, pass hash of payload including channel and client_id 
-    def self.sign(payload, secret, expire_at: Time.now + 12*3600, algorithm: 'HS256')
-      JWT.encode(payload.merge(exp: expire_at.to_i), secret, algorithm)
+    def self.sign(payload, secret, options = {})
+      options = {expires_at: Time.now + 12*3600, algorithm: 'HS256'}.merge(options)
+      JWT.encode(payload.merge(exp: options[:expires_at].to_i), secret, options[:algorithm])
     end
 
     # Return signed payload or raise

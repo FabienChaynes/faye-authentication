@@ -1,3 +1,5 @@
+require 'faye'
+
 module Faye
   module Authentication
     class Extension
