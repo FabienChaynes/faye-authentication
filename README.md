@@ -6,11 +6,11 @@ Authentification implementation for faye
 
 This project implements (channel,client_id) authentication on channel subscription and publication and delegate it to an external HTTP endpoint through HMAC tupple signature based on a shared secret key between Faye server and the endpoint.
 
-On channel subscription the JS client performe an Ajax Call to an HTTP endpoint to be granted a signature that will be provided to Faye Server to connect and publish to channel. The authentication of the endpoint itself is up to you but in the general case this will be a session authenticated resource of your app and you will decide to provide the signature or not depending on your own business logic. 
+On channel subscription the JS client performe an Ajax Call to an HTTP endpoint to be granted a signature that will be provided to Faye Server to connect and publish to channel. The authentication of the endpoint itself is up to you but in the general case this will be a session authenticated resource of your app and you will decide to provide the signature or not depending on your own business logic.
 
 This signature is required and valid for each channel and client id tupple and rely on HMAC for security.
- 
-The Faye server will verify the (channel,client_id) tupple signature and reject the message if the signature 
+
+The Faye server will verify the (channel,client_id) tupple signature and reject the message if the signature
 is incorrect or not present.
 
 ## Current support
@@ -82,7 +82,7 @@ Add the extension to your faye client :
 
 ````javascript
 var client = new Faye.Client('http://my.server/faye');
-client.add_extension(new FayeAuthentication());
+client.addExtension(new FayeAuthentication());
 ````
 
 By default, when sending a subscribe request or publishing a message, the extension
@@ -90,7 +90,7 @@ will issue an AJAX request to ``/faye/auth``
 
 If you wish to change the endpoint, you can supply it as the first argument of the extension constructor :
 
-    client.add_extension(new FayeAuthentication('/my_custom_auth_endpoint'));
+    client.addExtension(new FayeAuthentication('/my_custom_auth_endpoint'));
 
 ### Faye server extension
 
