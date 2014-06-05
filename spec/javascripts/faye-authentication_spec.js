@@ -3,12 +3,12 @@ describe('faye-authentication', function() {
   describe('constructor', function() {
 
     it('sets endpoint to /faye by default', function() {
-      var auth = new FayeAuthentication();
+      var auth = new FayeAuthentication(new Faye.Client('http://example.com'));
       expect(auth.endpoint()).toBe('/faye/auth');
     });
 
     it('can specify a custom endpoint', function() {
-      var auth = new FayeAuthentication('/custom');
+      var auth = new FayeAuthentication(new Faye.Client('http://example.com'), '/custom');
       expect(auth.endpoint()).toBe('/custom');
     });
 
