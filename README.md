@@ -82,15 +82,15 @@ Add the extension to your faye client :
 
 ````javascript
 var client = new Faye.Client('http://my.server/faye');
-client.add_extension(new FayeAuthentication());
+client.add_extension(new FayeAuthentication(client));
 ````
 
 By default, when sending a subscribe request or publishing a message, the extension
 will issue an AJAX request to ``/faye/auth``
 
-If you wish to change the endpoint, you can supply it as the first argument of the extension constructor :
+If you wish to change the endpoint, you can supply it as the second argument of the extension constructor, the first one being the client :
 
-    client.add_extension(new FayeAuthentication('/my_custom_auth_endpoint'));
+    client.add_extension(new FayeAuthentication(client, '/my_custom_auth_endpoint'));
 
 ### Faye server extension
 
