@@ -1,6 +1,6 @@
 require 'jwt'
 require 'faye/authentication/version'
-require 'faye/authentication/extension'
+require 'faye/authentication/server_extension'
 require 'faye/authentication/http_client'
 require 'faye/authentication/engine'
 
@@ -10,7 +10,7 @@ module Faye
     class ExpiredError < AuthError; end
     class PayloadError < AuthError; end
 
-    # Return jwt signature, pass hash of payload including channel and client_id 
+    # Return jwt signature, pass hash of payload including channel and client_id
     def self.sign(payload, secret, options = {})
       options = {expires_at: Time.now + 12*3600, algorithm: 'HS256'}.merge(options)
       JWT.encode(payload.merge(exp: options[:expires_at].to_i), secret, options[:algorithm])

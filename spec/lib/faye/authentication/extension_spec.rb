@@ -1,10 +1,10 @@
 require 'spec_helper'
-require 'faye/authentication/extension'
+require 'faye/authentication/server_extension'
 
-describe Faye::Authentication::Extension do
+describe Faye::Authentication::ServerExtension do
 
   let(:secret) { 'macaroni' }
-  let(:extension) { Faye::Authentication::Extension.new(secret) }
+  let(:extension) { Faye::Authentication::ServerExtension.new(secret) }
 
   it 'does not add an eror if the message is correctly signed' do
     message = {'channel' => '/foo/bar', 'clientId' => '42', 'text' => 'whatever'}

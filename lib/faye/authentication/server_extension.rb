@@ -2,7 +2,7 @@ require 'faye'
 
 module Faye
   module Authentication
-    class Extension
+    class ServerExtension
       include Faye::Logging
 
       def initialize(secret)
@@ -12,8 +12,8 @@ module Faye
       def incoming(message, callback)
         if message['channel'] == '/meta/subscribe' || !(message['channel'] =~ /^\/meta\/.*/)
           begin
-            Faye::Authentication.validate(message['signature'], 
-                                          message['subscription'] || message['channel'], 
+            Faye::Authentication.validate(message['signature'],
+                                          message['subscription'] || message['channel'],
                                           message['clientId'],
                                           @secret)
             debug("Authentication sucessful")
