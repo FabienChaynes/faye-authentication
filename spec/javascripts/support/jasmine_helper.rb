@@ -19,6 +19,8 @@ FAYE_SECRET_KEY = 'macaroni'
 fork do
     Faye::WebSocket.load_adapter('thin')
     faye = Faye::RackAdapter.new(:mount => '/faye')
+    #require 'logger'
+    #Faye.logger = Logger.new(STDOUT)
     faye.add_extension Faye::Authentication::Extension.new(FAYE_SECRET_KEY)
    Rack::Handler::Thin.run faye, :Port => 9296
 end.tap do |id|
