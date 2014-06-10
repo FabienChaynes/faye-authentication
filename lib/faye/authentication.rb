@@ -1,6 +1,7 @@
 require 'jwt'
 require 'faye/authentication/version'
 require 'faye/authentication/server_extension'
+require 'faye/authentication/client_extension'
 require 'faye/authentication/http_client'
 require 'faye/authentication/engine'
 
