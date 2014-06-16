@@ -98,10 +98,10 @@ Instanciate the extension with your secret key and add it to the server :
 
 ````ruby
 server = Faye::RackAdapter.new(:mount => '/faye', :timeout => 15)
-server.add_extension Faye::Authentication::Extension.new('your shared secret key')
+server.add_extension Faye::Authentication::ServerExtension.new('your shared secret key')
 ````
 
-Faye::Authentication::Extension expect that :
+Faye::Authentication::ServerExtension expect that :
 - a ``signature`` is present in the message for publish/subscribe request
 - this signature is a valid JWT token
 - the JWT payload contains "channel", "clientId" and a expiration timestamp "exp" that is not in the past.
