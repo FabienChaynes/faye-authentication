@@ -18,6 +18,7 @@ is incorrect or not present.
 Currently Implemented :
   - Javascript Client Extention (JQuery needed)
   - Ruby Faye Server Extension
+  - Ruby Faye Client Extension
   - Ruby utils to signing messages in your webapp
   - **Want another one ? Pull requests are welcome.**
 
@@ -92,7 +93,7 @@ If you wish to change the endpoint, you can supply it as the second argument of 
 
     client.addExtension(new FayeAuthentication(client, '/my_custom_auth_endpoint'));
 
-### Faye server extension
+### Ruby Faye server extension
 
 Instanciate the extension with your secret key and add it to the server :
 
@@ -107,6 +108,15 @@ Faye::Authentication::ServerExtension expect that :
 - the JWT payload contains "channel", "clientId" and a expiration timestamp "exp" that is not in the past.
 
 Otherwise Faye Server will refuse the message.
+
+### Ruby Faye client extension
+
+This extension allows the ruby ``Faye::Client`` to auto-sign its messages before sending them to the server.
+
+````ruby
+client = Faye::Client.new('http://localhost:9292/faye')
+client.add_extension Faye::Authentication::ClientExtension.new('your shared secret key')
+````
 
 ## Contributing
 
