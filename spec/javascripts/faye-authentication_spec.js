@@ -17,8 +17,8 @@ describe('faye-authentication', function() {
   describe('extension', function() {
     beforeEach(function() {
       jasmine.Ajax.install();
-      this.auth = new FayeAuthentication();
       this.client = new Faye.Client('http://localhost:9296/faye');
+      this.auth = new FayeAuthentication(this.client);
       this.client.addExtension(this.auth);
     });
 
@@ -117,36 +117,6 @@ describe('faye-authentication', function() {
           done();
         }, 500);
       });
-
-      it('should make only one ajax call when dealing with one channel', function(done) {
-        this.client.subscribe('/foobar');
-        this.client.publish('/foobar', {text: 'hallo'});
-        this.client.publish('/foobar', {text: 'hallo'});
-
-        setTimeout(function() {
-          expect(jasmine.Ajax.requests.count()).toBe(2); // Handshake + auth
-          done();
-        }, 500);
-
-      })
-
-      it('should make two ajax calls when dealing with two channels', function(done) {
-        this.client.subscribe('/foo');
-        this.client.publish('/foo', {text: 'hallo'});
-        this.client.publish('/foo', {text: 'hallo'});
-
-        this.client.subscribe('/bar');
-        this.client.publish('/bar', {text: 'hallo'});
-        this.client.publish('/bar', {text: 'hallo'});
-
-        setTimeout(function() {
-          expect(jasmine.Ajax.requests.count()).toBe(3); // Handshake + auth * 2
-          done();
-        }, 500);
-      });
     });
-
   });
-
-
-})
+});

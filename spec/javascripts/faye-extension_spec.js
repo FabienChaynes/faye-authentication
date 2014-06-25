@@ -59,6 +59,33 @@ describe('Faye extension', function() {
       });
     });
 
+    it('should make only one ajax call when dealing with one channel', function(done) {
+      this.client.subscribe('/foobar');
+      this.client.publish('/foobar', {text: 'hallo'});
+      this.client.publish('/foobar', {text: 'hallo'});
+
+      setTimeout(function() {
+        expect(jasmine.Ajax.requests.count()).toBe(2); // Handshake + auth * 1
+        done();
+      }, 500);
+
+    })
+
+    it('should make two ajax calls when dealing with two channels', function(done) {
+      this.client.subscribe('/foobar');
+      this.client.publish('/foobar', {text: 'hallo'});
+      this.client.publish('/foobar', {text: 'hallo'});
+
+      this.client.subscribe('/bar');
+      this.client.publish('/bar', {text: 'hallo'});
+      this.client.publish('/bar', {text: 'hallo'});
+
+      setTimeout(function() {
+        expect(jasmine.Ajax.requests.count()).toBe(3); // Handshake + auth * 2
+        done();
+      }, 500);
+    });
+
     it('tries to get a new signature immediately when the used signature is bad or expired', function(done) {
       jasmine.Ajax.stubRequest('/faye/auth').andReturn({
         'responseText': '{"signature": "bad"}'
