@@ -6,32 +6,65 @@ describe Faye::Authentication::ServerExtension do
   let(:secret) { 'macaroni' }
   let(:extension) { Faye::Authentication::ServerExtension.new(secret) }
 
-  it 'does not add an eror if the message is correctly signed' do
-    message = {'channel' => '/foo/bar', 'clientId' => '42', 'text' => 'whatever'}
-    signature = Faye::Authentication.sign(message, secret)
-    message['signature'] = signature
+  describe '#incoming' do
+    shared_examples 'signature_has_error' do
+      it 'adds an error' do
+        subject
+        expect(@result).to have_key('error')
+      end
+    end
 
-    result = nil
+    shared_examples 'signature_has_no_error' do
+      it 'adds no error' do
+        subject
+        expect(@result).to_not have_key('error')
+      end
+    end
 
-    extension.incoming(message, ->(m) { result = m });
+    shared_examples 'authentication_actions' do
+      context 'not signed' do
+        context '/public' do
+          context 'no globbing' do
+            let(:channel) { '/public/foo' }
+            it_should_behave_like 'signature_has_no_error'
+          end
 
-    expect(result).to_not have_key('error')
-  end
+          context 'globbing' do
+            let(:channel) { '/public/foo/*'}
+            it_should_behave_like 'signature_has_error'
+          end
+        end
 
-  it 'adds an eror if the message is not signed' do
-    message = {'channel' => '/foo/bar', 'clientId' => '42', 'text' => 'whatever'}
-    result = nil
-    extension.incoming(message, ->(m) { result = m });
+        context 'not public' do
+          context 'not signed' do
+            let(:channel) { '/whatever' }
+            it_should_behave_like 'signature_has_error'
+          end
 
-    expect(result).to have_key('error')
-  end
+          context 'signed' do
+            let(:channel) { '/foo/bar' }
+            before { message['signature'] = Faye::Authentication.sign(message.merge({'channel' => channel}), secret) }
+            it_should_behave_like 'signature_has_no_error'
+          end
 
-  it 'adds an error if the signature is incorrect' do
-    message = {'channel' => '/foo/bar', 'clientId' => '42', 'text' => 'whatever', 'signature' => 'hello'}
-    result = nil
-    extension.incoming(message, ->(m) { result = m });
+        end
+      end
+    end
 
-    expect(result).to have_key('error')
+    let(:message) { {'channel' => channel, 'clientId' => '42', 'text' => 'whatever'} }
+    subject do
+      extension.incoming(message, ->(m) { @result = m });
+    end
+
+    context 'publish' do
+      it_should_behave_like 'authentication_actions'
+    end
+
+    context 'subscribe' do
+      before { message['channel'] = '/meta/subscribe'}
+      before { message['subscription'] = channel}
+      it_should_behave_like 'authentication_actions'
+    end
   end
 
   ['/meta/handshake', '/meta/connect', '/meta/unsubscribe', '/meta/disconnect'].each do |channel|

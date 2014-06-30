@@ -10,7 +10,7 @@ module Faye
       end
 
       def incoming(message, callback)
-        if message['channel'] == '/meta/subscribe' || !(message['channel'] =~ /^\/meta\/.*/)
+        if Faye::Authentication.authentication_required?(message)
           begin
             Faye::Authentication.validate(message['signature'],
                                           message['subscription'] || message['channel'],

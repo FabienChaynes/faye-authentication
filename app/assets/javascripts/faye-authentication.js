@@ -42,14 +42,23 @@ FayeAuthentication.prototype.signMessage = function(message, callback) {
 }
 
 FayeAuthentication.prototype.outgoing = function(message, callback) {
-  if (message.channel == '/meta/subscribe') {
+  if (this.authentication_required(message))
     this.signMessage(message, callback);
-  }
-  else if (!/^\/meta\/(.*)/.test(message.channel)) { // Publish
-    this.signMessage(message, callback);
-  }
   else
     callback(message);
+};
+
+FayeAuthentication.prototype.authentication_required = function(message) {
+  var subscription_or_channel = message.subscription || message.channel
+  return (!this.public_channel(subscription_or_channel) && (message.channel == '/meta/subscribe' || !/^\/meta\/(.*)/.test(message.channel)))
+};
+
+FayeAuthentication.prototype.public_channel = function(channel) {
+  if (channel.lastIndexOf('/public', 0) === 0) {
+    return (channel.indexOf('*') == -1);
+  } else {
+    return (false);
+  }
 };
 
 FayeAuthentication.prototype.incoming = function(message, callback) {

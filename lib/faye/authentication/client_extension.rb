@@ -8,7 +8,7 @@ module Faye
       end
 
       def outgoing(message, callback)
-        if message['channel'] == '/meta/subscribe' || !(message['channel'] =~ /^\/meta\/.*/)
+        if Faye::Authentication.authentication_required?(message)
           message['signature'] = Faye::Authentication.sign({channel: message['subscription'] || message['channel'], clientId: message['clientId']}, @secret, @options)
         end
         callback.call(message)

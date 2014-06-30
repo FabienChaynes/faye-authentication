@@ -31,5 +31,20 @@ module Faye
       raise PayloadError unless channel == payload['channel'] && clientId == payload['clientId']
       true
     end
+
+    def self.authentication_required?(message)
+      subscription_or_channel = message['subscription'] || message['channel']
+      !public_channel?(subscription_or_channel) && (message['channel'] == '/meta/subscribe' || (!(message['channel'] =~ /^\/meta\/.*/)))
+    end
+
+    def self.public_channel?(channel)
+      if channel.start_with?('/public/')
+        unless channel.include?('*')
+          return true
+        end
+      end
+      false
+    end
+
   end
 end

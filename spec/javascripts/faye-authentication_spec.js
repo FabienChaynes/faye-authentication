@@ -117,6 +117,26 @@ describe('faye-authentication', function() {
           done();
         }, 500);
       });
+
+
+      it('does not add the signature to a public message', function(done) {
+        var self = this;
+
+        this.client.handshake(function() {
+          self.client._transport = self.fake_transport
+          self.client.publish('/public/foo', {text: 'hallo'});
+        }, this.client);
+
+        setTimeout(function() {
+          var calls = self.fake_transport.send.calls.all();
+          var last_call = calls[calls.length - 1];
+          var message = last_call.args[0].message;
+          expect(message.channel).toBe('/public/foo');
+          expect(message.signature).toBe(undefined);
+          done();
+        }, 500);
+      });
+
     });
   });
 });

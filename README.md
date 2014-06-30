@@ -38,6 +38,18 @@ Or install it yourself as:
 
 ## Usage
 
+### Channels requiring authentication
+
+All channels require authentication, except channels beginning by ``/public/``
+
+However, globbing, even on ``/public/`` channels will require authentication.
+
+Example :
+
+- ``/public/foo`` does not require authentication
+- ``/public/bar/*`` requires authentication
+
+
 ### Authentication endpoint requirements
 
 The endpoint will receive a POST request, and shall return a JSON hash with a ``signature`` key.
