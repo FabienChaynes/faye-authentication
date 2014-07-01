@@ -34,16 +34,11 @@ module Faye
 
     def self.authentication_required?(message)
       subscription_or_channel = message['subscription'] || message['channel']
-      !public_channel?(subscription_or_channel) && (message['channel'] == '/meta/subscribe' || (!(message['channel'] =~ /^\/meta\/.*/)))
+      !public_channel?(subscription_or_channel) && (message['channel'] == '/meta/subscribe' || (!(message['channel'].start_with?('/meta/'))))
     end
 
     def self.public_channel?(channel)
-      if channel.start_with?('/public/')
-        unless channel.include?('*')
-          return true
-        end
-      end
-      false
+      channel.start_with?('/public/') and not channel.include?('*')
     end
 
   end

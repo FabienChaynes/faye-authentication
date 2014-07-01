@@ -50,11 +50,11 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
 
 FayeAuthentication.prototype.authentication_required = function(message) {
   var subscription_or_channel = message.subscription || message.channel
-  return (!this.public_channel(subscription_or_channel) && (message.channel == '/meta/subscribe' || !/^\/meta\/(.*)/.test(message.channel)))
+  return (!this.public_channel(subscription_or_channel) && (message.channel == '/meta/subscribe' || message.channel.lastIndexOf('/meta/', 0) !== 0))
 };
 
 FayeAuthentication.prototype.public_channel = function(channel) {
-  if (channel.lastIndexOf('/public', 0) === 0) {
+  if (channel.lastIndexOf('/public/', 0) === 0) {
     return (channel.indexOf('*') == -1);
   } else {
     return (false);
