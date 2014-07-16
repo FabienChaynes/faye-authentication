@@ -1,8 +1,9 @@
-function FayeAuthentication(client, endpoint) {
+function FayeAuthentication(client, endpoint, options) {
   this._client = client;
   this._endpoint = endpoint || '/faye/auth';
   this._signatures = {};
   this._outbox = {};
+  this._options = options || {};
 }
 
 FayeAuthentication.prototype.endpoint = function() {
@@ -50,15 +51,11 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
 
 FayeAuthentication.prototype.authentication_required = function(message) {
   var subscription_or_channel = message.subscription || message.channel
-  return (!this.public_channel(subscription_or_channel) && (message.channel == '/meta/subscribe' || message.channel.lastIndexOf('/meta/', 0) !== 0))
-};
-
-FayeAuthentication.prototype.public_channel = function(channel) {
-  if (channel.lastIndexOf('/public/', 0) === 0) {
-    return (channel.indexOf('*') == -1);
-  } else {
+  var whitelist_function = this._options.whitelist;
+  if (message.channel == '/meta/subscribe' || message.channel.lastIndexOf('/meta/', 0) !== 0)
+    return (this._options.whitelist ? !this._options.whitelist(message) : true);
+  else
     return (false);
-  }
 };
 
 FayeAuthentication.prototype.incoming = function(message, callback) {

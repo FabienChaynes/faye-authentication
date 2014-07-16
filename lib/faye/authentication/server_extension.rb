@@ -5,12 +5,13 @@ module Faye
     class ServerExtension
       include Faye::Logging
 
-      def initialize(secret)
+      def initialize(secret, options = {})
+        @options = options
         @secret = secret.to_s
       end
 
       def incoming(message, callback)
-        if Faye::Authentication.authentication_required?(message)
+        if Faye::Authentication.authentication_required?(message, @options)
           begin
             Faye::Authentication.validate(message['signature'],
                                           message['subscription'] || message['channel'],

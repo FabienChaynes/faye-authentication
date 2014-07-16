@@ -14,6 +14,87 @@ describe('faye-authentication', function() {
 
   });
 
+  describe('authentication_required', function() {
+
+    beforeEach(function() {
+      this.auth = new FayeAuthentication(new Faye.Client('http://example.com'));
+    });
+
+    function sharedExamplesForSubscribeAndPublish() {
+      it('returns true if no options is passed', function() {
+        expect(this.auth.authentication_required(this.message)).toBe(true);
+      });
+
+      it ('returns false if function returns true', function() {
+        this.auth._options.whitelist = function(message) { return(true); }
+        expect(this.auth.authentication_required(this.message)).toBe(false);
+      });
+
+      it ('returns true if function returns false', function() {
+        this.auth._options.whitelist = function(message) { return(false); }
+        expect(this.auth.authentication_required(this.message)).toBe(true);
+      });
+    }
+
+    function sharedExamplesForMetaExceptPublish() {
+      it('returns false if no options is passed', function() {
+        expect(this.auth.authentication_required(this.message)).toBe(false);
+      });
+
+      it ('returns false if function returns true', function() {
+        this.auth._options.whitelist = function(message) { return(true); }
+        expect(this.auth.authentication_required(this.message)).toBe(false);
+      });
+
+      it ('returns false if function returns false', function() {
+        this.auth._options.whitelist = function(message) { return(false); }
+        expect(this.auth.authentication_required(this.message)).toBe(false);
+      });
+    }
+
+    describe('publish', function() {
+
+      beforeEach(function() {
+        this.message = {'channel': '/foobar'};
+      });
+
+      sharedExamplesForSubscribeAndPublish();
+    });
+
+    describe('subscribe', function() {
+      beforeEach(function() {
+        this.message = {'channel': '/meta/subscribe', 'subscription': '/foobar'};
+      });
+
+      sharedExamplesForSubscribeAndPublish();
+    });
+
+    describe('handshake', function() {
+      beforeEach(function() {
+        this.message = {'channel': '/meta/handshake'};
+      });
+
+      sharedExamplesForMetaExceptPublish();
+    });
+
+    describe('connect', function() {
+      beforeEach(function() {
+        this.message = {'channel': '/meta/connect'};
+      });
+
+      sharedExamplesForMetaExceptPublish();
+    });
+
+    describe('unsubscribe', function() {
+      beforeEach(function() {
+        this.message = {'channel': '/meta/unsubscribe', 'handshake': '/foobar'};
+      });
+
+      sharedExamplesForMetaExceptPublish();
+    });
+
+  });
+
   describe('extension', function() {
     beforeEach(function() {
       jasmine.Ajax.install();
@@ -118,20 +199,21 @@ describe('faye-authentication', function() {
         }, 500);
       });
 
-
-      it('does not add the signature to a public message', function(done) {
+      it('does not add the signature if authentication is not required', function(done) {
         var self = this;
+
+        spyOn(this.auth, 'authentication_required').and.returnValue(false);
 
         this.client.handshake(function() {
           self.client._transport = self.fake_transport
-          self.client.publish('/public/foo', {text: 'hallo'});
+          self.client.publish('/foobar', {text: 'hallo'});
         }, this.client);
 
         setTimeout(function() {
           var calls = self.fake_transport.send.calls.all();
           var last_call = calls[calls.length - 1];
           var message = last_call.args[0].message;
-          expect(message.channel).toBe('/public/foo');
+          expect(message.channel).toBe('/foobar');
           expect(message.signature).toBe(undefined);
           done();
         }, 500);

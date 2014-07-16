@@ -1,10 +1,11 @@
 require 'spec_helper'
-require 'faye/authentication/server_extension'
+require 'faye/authentication'
 
 describe Faye::Authentication::ServerExtension do
 
   let(:secret) { 'macaroni' }
   let(:extension) { Faye::Authentication::ServerExtension.new(secret) }
+  let(:channel) { '/channel' }
 
   describe '#incoming' do
     shared_examples 'signature_has_error' do
@@ -22,31 +23,20 @@ describe Faye::Authentication::ServerExtension do
     end
 
     shared_examples 'authentication_actions' do
-      context 'not signed' do
-        context '/public' do
-          context 'no globbing' do
-            let(:channel) { '/public/foo' }
-            it_should_behave_like 'signature_has_no_error'
-          end
+      context 'does not require signature' do
+        before { expect(Faye::Authentication).to receive(:authentication_required?).with(message, {}).and_return(false) }
+        it_should_behave_like 'signature_has_no_error'
+      end
 
-          context 'globbing' do
-            let(:channel) { '/public/foo/*'}
-            it_should_behave_like 'signature_has_error'
-          end
+      context 'requires signature' do
+        before { expect(Faye::Authentication).to receive(:authentication_required?).with(message, {}).and_return(true) }
+        context 'with signature' do
+          before { message['signature'] = Faye::Authentication.sign(message.merge({'channel' => channel}), secret) }
+          it_should_behave_like 'signature_has_no_error'
         end
 
-        context 'not public' do
-          context 'not signed' do
-            let(:channel) { '/whatever' }
-            it_should_behave_like 'signature_has_error'
-          end
-
-          context 'signed' do
-            let(:channel) { '/foo/bar' }
-            before { message['signature'] = Faye::Authentication.sign(message.merge({'channel' => channel}), secret) }
-            it_should_behave_like 'signature_has_no_error'
-          end
-
+        context 'without signature' do
+          it_should_behave_like 'signature_has_error'
         end
       end
     end
@@ -70,7 +60,7 @@ describe Faye::Authentication::ServerExtension do
   ['/meta/handshake', '/meta/connect', '/meta/unsubscribe', '/meta/disconnect'].each do |channel|
     it "does not check the signature for #{channel}" do
       message = {'channel' => channel, 'clientId' => '42', 'text' => 'whatever', 'signature' => 'hello'}
-      expect(Faye::Authentication).to_not receive(:valid?)
+      expect(Faye::Authentication).to_not receive(:validate)
       extension.incoming(message, ->(_) {});
     end
   end

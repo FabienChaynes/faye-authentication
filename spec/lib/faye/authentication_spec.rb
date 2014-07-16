@@ -8,7 +8,7 @@ describe Faye::Authentication do
   let(:message) { {'channel' => channel, 'clientId' => clientId, 'text' => 'whatever'} }
   let(:secret) { 'helloworld' }
   let(:signature) { Faye::Authentication.sign(message, secret) }
- 
+
   describe '#sign' do
     it 'returns with a default expiry'
   end
@@ -53,6 +53,90 @@ describe Faye::Authentication do
     it 'raises if the channel is not defined' do
       expect { Faye::Authentication.validate(signature, channel, nil, secret) }.to raise_error(Faye::Authentication::PayloadError)
     end
+  end
+
+  describe '#authentication_required?' do
+
+    before(:each) { Faye.logger = nil }
+
+    shared_examples 'subscribe_and_publish' do
+      it 'returns true if no options are passed' do
+        expect(Faye::Authentication.authentication_required?(message)).to be(true)
+      end
+
+      it 'returns true if empty options are passed' do
+        expect(Faye::Authentication.authentication_required?(message, {})).to be(true)
+      end
+
+      it 'returns true if not a lamda / proc' do
+        expect(Faye::Authentication.authentication_required?(message, {whitelist: 42})).to be(true)
+      end
+
+      it 'returns true if lambda raises' do
+        expect(Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| raise "oops" }})).to be(true)
+      end
+
+      it 'logs the error if lambda raises' do
+        Faye.logger = double()
+        expect(Faye.logger).to receive(:error).with("[Module] Error caught when evaluating whitelist lambda : oops")
+        Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| raise "oops" }})
+      end
+
+      it 'returns true if lambda returns false' do
+        expect(Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| false }})).to be(true)
+      end
+
+      it 'returns false if lambda returns true' do
+        expect(Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| true }})).to be(false)
+      end
+    end
+
+    shared_examples 'meta_except_subscribe' do
+      it 'returns false if no options are passed' do
+        expect(Faye::Authentication.authentication_required?(message)).to be(false)
+      end
+
+      it 'returns false if empty options are passed' do
+        expect(Faye::Authentication.authentication_required?(message, {})).to be(false)
+      end
+
+      it 'returns false even if lambda returns false' do
+        expect(Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| false }})).to be(false)
+      end
+
+      it 'does not call lambda / proc' do
+        not_called = double()
+        expect(not_called).to_not receive(:call)
+        (Faye::Authentication.authentication_required?(message, {whitelist: not_called}))
+      end
+
+    end
+
+    context 'publish' do
+      let(:message) { {'channel' => '/foobar'} }
+      it_behaves_like 'subscribe_and_publish'
+    end
+
+    context 'subscribe' do
+      let(:message) { {'channel' => '/meta/subscribe', 'subscription' => '/foobar'} }
+      it_behaves_like 'subscribe_and_publish'
+    end
+
+    context 'handshake' do
+      let(:message) { {'channel' => '/meta/handshake'} }
+      it_behaves_like 'meta_except_subscribe'
+    end
+
+    context 'connect' do
+      let(:message) { {'channel' => '/meta/connect'} }
+      it_behaves_like 'meta_except_subscribe'
+    end
+
+    context 'unsubscribe' do
+      let(:message) { {'channel' => '/meta/unsubscribe', 'subscription' => '/foobar'} }
+      it_behaves_like 'meta_except_subscribe'
+    end
+
   end
 
 end

@@ -1,4 +1,5 @@
 require 'jwt'
+require 'faye/mixins/logging'
 require 'faye/authentication/version'
 require 'faye/authentication/server_extension'
 require 'faye/authentication/client_extension'
@@ -7,6 +8,9 @@ require 'faye/authentication/engine'
 
 module Faye
   module Authentication
+
+    extend Faye::Logging
+
     class AuthError < StandardError; end
     class ExpiredError < AuthError; end
     class PayloadError < AuthError; end
@@ -32,13 +36,18 @@ module Faye
       true
     end
 
-    def self.authentication_required?(message)
+    def self.authentication_required?(message, options = {})
       subscription_or_channel = message['subscription'] || message['channel']
-      !public_channel?(subscription_or_channel) && (message['channel'] == '/meta/subscribe' || (!(message['channel'].start_with?('/meta/'))))
-    end
-
-    def self.public_channel?(channel)
-      channel.start_with?('/public/') and not channel.include?('*')
+      return false unless (message['channel'] == '/meta/subscribe' || (!(message['channel'].start_with?('/meta/'))))
+      whitelist_proc = options[:whitelist]
+      if whitelist_proc
+        begin
+          return !whitelist_proc.call(message)
+        rescue => e
+          error("Error caught when evaluating whitelist lambda : #{e.message}")
+        end
+      end
+      true
     end
 
   end
