@@ -11,8 +11,8 @@
 #   - dist/**/*.js
 #
 src_files:
-  - app/assets/javascripts/*.js
   - spec/utils/javascripts/*.js
+  - app/assets/javascripts/*.js
 
 # stylesheets
 #

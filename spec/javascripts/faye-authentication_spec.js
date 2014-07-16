@@ -18,6 +18,7 @@ describe('faye-authentication', function() {
 
     beforeEach(function() {
       this.auth = new FayeAuthentication(new Faye.Client('http://example.com'));
+      Faye.logger = null;
     });
 
     function sharedExamplesForSubscribeAndPublish() {
@@ -30,6 +31,14 @@ describe('faye-authentication', function() {
         spyOn(this.auth._options, 'whitelist');
         this.auth.authentication_required(this.message);
         expect(this.auth._options.whitelist).toHaveBeenCalledWith(this.message.subscription || this.message.channel);
+      });
+
+      it('logs error if the function throws', function() {
+        this.auth._options.whitelist = function(message) { throw new Error("boom"); }
+        Faye.logger = {error: function() {}};
+        spyOn(Faye.logger, 'error');
+        this.auth.authentication_required(this.message);
+        expect(Faye.logger.error).toHaveBeenCalledWith('[Faye] Error caught when evaluating whitelist function : boom');
       });
 
       it ('returns false if function returns true', function() {
