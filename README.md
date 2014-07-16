@@ -105,7 +105,9 @@ to a function :
 
 ````javascript
 function channelWhitelist(message) {
-  return (message.channel == '/public')
+  // Allow channels beginning with /public but disallow globbing
+  var channel = message.subscription || message.channel;
+  return (channel.lastIndexOf('/public/', 0) === 0 && channel.indexOf('*') == -1);
 }
 
 client.addExtension(new FayeAuthentication(client, '/faye/auth', {whitelist: channelWhitelist}));
@@ -134,7 +136,9 @@ to a lambda :
 
 ````ruby
 channel_whitelist = lambda do |message|
-  message['channel'] == '/public'
+  # Allow channels beginning with /public but disallow globbing
+  channel = message['subscription'] || message['channel']
+  channel.start_with?('/public/') and not channel.include?('*')
 end
 
 server = Faye::RackAdapter.new(:mount => '/faye', :timeout => 15)
