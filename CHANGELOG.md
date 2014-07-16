@@ -1,3 +1,8 @@
+## 0.5.0
+ - More extensibility regarding public channels, extensions now take an options
+   hash with a whitelist lambda / function that will be called with the channel
+   name so developers can implement their own logic
+
 ## 0.4.0
   - Channels beginning by ``/public/`` do not require authentication anymore,
   However, globbing with public channels still require authentication.

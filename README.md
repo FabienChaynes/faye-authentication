@@ -40,15 +40,8 @@ Or install it yourself as:
 
 ### Channels requiring authentication
 
-All channels require authentication, except channels beginning by ``/public/``
-
-However, globbing, even on ``/public/`` channels will require authentication.
-
-Example :
-
-- ``/public/foo`` does not require authentication
-- ``/public/bar/*`` requires authentication
-
+All channels require authentication by default, however, it is possible to provide
+a lambda to the faye extensions to let them know which channels are public.
 
 ### Authentication endpoint requirements
 
@@ -102,8 +95,22 @@ By default, when sending a subscribe request or publishing a message, the extens
 will issue an AJAX request to ``/faye/auth``
 
 If you wish to change the endpoint, you can supply it as the second argument of the extension constructor, the first one being the client :
+````javascript
+client.addExtension(new FayeAuthentication(client, '/my_custom_auth_endpoint'));
+````
 
-    client.addExtension(new FayeAuthentication(client, '/my_custom_auth_endpoint'));
+If you want to specify some channels for which you don't want the extension to
+call your endpoint, you can pass an options object with a ``whitelist`` key mapping
+to a function :
+
+````javascript
+function channelWhitelist(message) {
+  return (message.channel == '/public')
+}
+
+client.addExtension(new FayeAuthentication(client, '/faye/auth', {whitelist: channelWhitelist}));
+````
+
 
 ### Ruby Faye server extension
 
@@ -120,6 +127,19 @@ Faye::Authentication::ServerExtension expect that :
 - the JWT payload contains "channel", "clientId" and a expiration timestamp "exp" that is not in the past.
 
 Otherwise Faye Server will refuse the message.
+
+If you want to specify some channels for which you don't want the extension require
+authentication, you can pass an options hash with a ``whitelist`` key mapping
+to a lambda :
+
+````ruby
+channel_whitelist = lambda do |message|
+  message['channel'] == '/public'
+end
+
+server = Faye::RackAdapter.new(:mount => '/faye', :timeout => 15)
+server.add_extension Faye::Authentication::ServerExtension.new('your shared secret key', {whitelist: channel_whitelist})
+````
 
 ### Ruby Faye client extension
 
