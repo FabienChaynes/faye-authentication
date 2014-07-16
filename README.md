@@ -58,9 +58,9 @@ The parameters sent to the endpoint are the following :
 
 ```json
 {
-    'message' : {
-        'channel': '/foo/bar',
-        'clientId': '123abc'
+    "message" : {
+        "channel": "/foo/bar",
+        "clientId": "123abc"
     }
 }
 ```
