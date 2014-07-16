@@ -51,9 +51,8 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
 
 FayeAuthentication.prototype.authentication_required = function(message) {
   var subscription_or_channel = message.subscription || message.channel
-  var whitelist_function = this._options.whitelist;
   if (message.channel == '/meta/subscribe' || message.channel.lastIndexOf('/meta/', 0) !== 0)
-    return (this._options.whitelist ? !this._options.whitelist(message) : true);
+    return (this._options.whitelist ? !this._options.whitelist(subscription_or_channel) : true);
   else
     return (false);
 };

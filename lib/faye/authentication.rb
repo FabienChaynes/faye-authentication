@@ -42,7 +42,7 @@ module Faye
       whitelist_proc = options[:whitelist]
       if whitelist_proc
         begin
-          return !whitelist_proc.call(message)
+          return !whitelist_proc.call(subscription_or_channel)
         rescue => e
           error("Error caught when evaluating whitelist lambda : #{e.message}")
         end

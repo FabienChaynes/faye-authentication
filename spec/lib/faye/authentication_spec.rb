@@ -72,6 +72,12 @@ describe Faye::Authentication do
         expect(Faye::Authentication.authentication_required?(message, {whitelist: 42})).to be(true)
       end
 
+      it 'calls the lambda with the channel or subscription' do
+        block = double
+        expect(block).to receive(:call).with(message['subscription'] || message['channel'])
+        Faye::Authentication.authentication_required?(message, {whitelist: block})
+      end
+
       it 'returns true if lambda raises' do
         expect(Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| raise "oops" }})).to be(true)
       end

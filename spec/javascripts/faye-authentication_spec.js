@@ -25,6 +25,13 @@ describe('faye-authentication', function() {
         expect(this.auth.authentication_required(this.message)).toBe(true);
       });
 
+      it('calls function with subscription or channel', function() {
+        this.auth._options.whitelist = function(message) { return(true); }
+        spyOn(this.auth._options, 'whitelist');
+        this.auth.authentication_required(this.message);
+        expect(this.auth._options.whitelist).toHaveBeenCalledWith(this.message.subscription || this.message.channel);
+      });
+
       it ('returns false if function returns true', function() {
         this.auth._options.whitelist = function(message) { return(true); }
         expect(this.auth.authentication_required(this.message)).toBe(false);

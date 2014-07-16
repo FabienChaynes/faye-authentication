@@ -104,9 +104,8 @@ call your endpoint, you can pass an options object with a ``whitelist`` key mapp
 to a function :
 
 ````javascript
-function channelWhitelist(message) {
+function channelWhitelist(channel) {
   // Allow channels beginning with /public but disallow globbing
-  var channel = message.subscription || message.channel;
   return (channel.lastIndexOf('/public/', 0) === 0 && channel.indexOf('*') == -1);
 }
 
@@ -135,9 +134,8 @@ authentication, you can pass an options hash with a ``whitelist`` key mapping
 to a lambda :
 
 ````ruby
-channel_whitelist = lambda do |message|
+channel_whitelist = lambda do |channel|
   # Allow channels beginning with /public but disallow globbing
-  channel = message['subscription'] || message['channel']
   channel.start_with?('/public/') and not channel.include?('*')
 end
 
