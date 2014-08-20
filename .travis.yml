@@ -2,3 +2,6 @@ language: ruby
 rvm:
   - 2.1.2
   - 1.9.3
+gemfile:
+  - gemfiles/Gemfile.faye-1.0.x
+  - gemfiles/Gemfile.faye-dispatcher

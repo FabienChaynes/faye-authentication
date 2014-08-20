@@ -49,15 +49,14 @@ The endpoint will receive a POST request, and shall return a JSON hash with a ``
 
 The parameters sent to the endpoint are the following :
 
-````
+```json
 {
-  'message' =>
-    {
-      'channel'   => '/foo/bar',
-      'clientId'  => '123abc'
+    "message" : {
+        "channel": "/foo/bar",
+        "clientId": "123abc"
     }
 }
-````
+```
 
 If the endpoint returns an error, the message won't be signed and the server will reject it.
 
@@ -65,7 +64,7 @@ You can use ``Faye::Authentication.sign`` to generate the signature from the mes
 
 Example (For a Rails application)
 
-````ruby
+```ruby
 def auth
   if current_user.can?(:read, params[:message][:channel])
     render json: {signature: Faye::Authentication.sign(params[:message].slice(:channel,:clientId), 'your shared secret key')}
@@ -74,22 +73,22 @@ def auth
   end
 end
 
-````
+```
 
 A Ruby HTTP Client is also available for publishing messages to your faye server
 without the hassle of using EventMachine :
 
-````ruby
+```ruby
 Faye::Authentication::HTTPClient.publish('http://localhost:9290/faye', '/channel', 'data', 'your private key')
-````
+```
 ### Javascript client extension
 
 Add the extension to your faye client :
 
-````javascript
+```javascript
 var client = new Faye.Client('http://my.server/faye');
 client.addExtension(new FayeAuthentication(client));
-````
+```
 
 By default, when sending a subscribe request or publishing a message, the extension
 will issue an AJAX request to ``/faye/auth``
@@ -117,10 +116,10 @@ client.addExtension(new FayeAuthentication(client, '/faye/auth', {whitelist: cha
 
 Instanciate the extension with your secret key and add it to the server :
 
-````ruby
+```ruby
 server = Faye::RackAdapter.new(:mount => '/faye', :timeout => 15)
 server.add_extension Faye::Authentication::ServerExtension.new('your shared secret key')
-````
+```
 
 Faye::Authentication::ServerExtension expect that :
 - a ``signature`` is present in the message for publish/subscribe request
@@ -147,10 +146,10 @@ server.add_extension Faye::Authentication::ServerExtension.new('your shared secr
 
 This extension allows the ruby ``Faye::Client`` to auto-sign its messages before sending them to the server.
 
-````ruby
+```ruby
 client = Faye::Client.new('http://localhost:9292/faye')
 client.add_extension Faye::Authentication::ClientExtension.new('your shared secret key')
-````
+```
 
 ## Contributing
 
