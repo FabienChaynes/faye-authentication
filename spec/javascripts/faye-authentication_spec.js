@@ -151,68 +151,72 @@ describe('faye-authentication', function() {
           'responseText': '{"signature": "foobarsignature"}'
         });
 
-        this.fake_transport = {connectionType: "fake", endpoint: {}, send: function() {}};
-        spyOn(this.fake_transport, 'send');
+        this.dispatcher = {connectionType: "fake", sendMessage: function() {}, selectTransport: function() { }};
+        spyOn(this.dispatcher, 'sendMessage');
+        spyOn(this.dispatcher, 'selectTransport');
+        Faye.extend(this.dispatcher, Faye.Publisher)
       });
 
       it('should add the signature to subscribe message', function(done) {
         var self = this;
 
         this.client.handshake(function() {
-          self.client._transport = self.fake_transport
+          self.client._dispatcher = self.dispatcher;
           self.client.subscribe('/foobar');
+
+          setTimeout(function() {
+            var calls = self.dispatcher.sendMessage.calls.all();
+            var last_call = calls[calls.length - 1];
+            var message = last_call.args[0];
+            expect(message.channel).toBe('/meta/subscribe');
+            expect(message.signature).toBe('foobarsignature');
+            done();
+          }, 300);
+
         }, this.client);
-
-        setTimeout(function() {
-          var calls = self.fake_transport.send.calls.all();
-          var last_call = calls[calls.length - 1];
-          var message = last_call.args[0].message;
-          expect(message.channel).toBe('/meta/subscribe');
-          expect(message.signature).toBe('foobarsignature');
-          done();
-        }, 500);
-
       });
 
       it('should add the signature to publish message', function(done) {
         var self = this;
 
         this.client.handshake(function() {
-          self.client._transport = self.fake_transport
+          self.client._dispatcher = self.dispatcher;
           self.client.publish('/foobar', {text: 'hallo'});
-        }, this.client);
 
-        setTimeout(function() {
-          var calls = self.fake_transport.send.calls.all();
-          var last_call = calls[calls.length - 1];
-          var message = last_call.args[0].message;
-          expect(message.channel).toBe('/foobar');
-          expect(message.signature).toBe('foobarsignature');
-          done();
-        }, 500);
+          setTimeout(function() {
+            var calls = self.dispatcher.sendMessage.calls.all();
+            var last_call = calls[calls.length - 1];
+            var message = last_call.args[0];
+            expect(message.channel).toBe('/foobar');
+            expect(message.signature).toBe('foobarsignature');
+            done();
+          }, 300);
+
+        }, this.client);
       });
 
       it('preserves messages integrity', function(done) {
         var self = this;
 
         this.client.handshake(function() {
-          self.client._transport = self.fake_transport
+          self.client._dispatcher = self.dispatcher;
           self.client.publish('/foo', {text: 'hallo'});
           self.client.subscribe('/foo');
-        }, this.client);
 
-        setTimeout(function() {
-          var calls = self.fake_transport.send.calls.all();
-          var subscribe_call = calls[calls.length - 1];
-          var publish_call = calls[calls.length - 2];
-          var subscribe_message = subscribe_call.args[0].message;
-          var publish_message = publish_call.args[0].message;
-          expect(publish_message.channel).toBe('/foo');
-          expect(subscribe_message.channel).toBe('/meta/subscribe');
-          expect(publish_message.signature).toBe('foobarsignature');
-          expect(subscribe_message.signature).toBe('foobarsignature');
-          done();
-        }, 500);
+          setTimeout(function() {
+            var calls = self.dispatcher.sendMessage.calls.all();
+            var subscribe_call = calls[calls.length - 1];
+            var publish_call = calls[calls.length - 2];
+            var subscribe_message = subscribe_call.args[0];
+            var publish_message = publish_call.args[0];
+            expect(publish_message.channel).toBe('/foo');
+            expect(subscribe_message.channel).toBe('/meta/subscribe');
+            expect(publish_message.signature).toBe('foobarsignature');
+            expect(subscribe_message.signature).toBe('foobarsignature');
+            done();
+          }, 300);
+
+        }, this.client);
       });
 
       it('does not add the signature if authentication is not required', function(done) {
@@ -221,18 +225,19 @@ describe('faye-authentication', function() {
         spyOn(this.auth, 'authentication_required').and.returnValue(false);
 
         this.client.handshake(function() {
-          self.client._transport = self.fake_transport
+          self.client._dispatcher = self.dispatcher;
           self.client.publish('/foobar', {text: 'hallo'});
+
+          setTimeout(function() {
+            var calls = self.dispatcher.sendMessage.calls.all();
+            var last_call = calls[calls.length - 1];
+            var message = last_call.args[0];
+            expect(message.channel).toBe('/foobar');
+            expect(message.signature).toBe(undefined);
+            done();
+          }, 300);
         }, this.client);
 
-        setTimeout(function() {
-          var calls = self.fake_transport.send.calls.all();
-          var last_call = calls[calls.length - 1];
-          var message = last_call.args[0].message;
-          expect(message.channel).toBe('/foobar');
-          expect(message.signature).toBe(undefined);
-          done();
-        }, 500);
       });
 
     });

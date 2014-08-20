@@ -31,7 +31,7 @@ describe('Faye extension', function() {
     function stubSignature(context, callback) {
       var self = context;
       self.client.handshake(function() {
-        var jwtsign = new jwt.WebToken('{"clientId": "' + self.client._clientId + '", "channel": "/foobar", "exp": 2803694528}', '{"alg": "HS256"}');
+        var jwtsign = new jwt.WebToken('{"clientId": "' + self.client._dispatcher.clientId + '", "channel": "/foobar", "exp": 2803694528}', '{"alg": "HS256"}');
         var signature = jwtsign.serialize("macaroni");
 
         jasmine.Ajax.stubRequest('/faye/auth').andReturn({

@@ -72,7 +72,7 @@ FayeAuthentication.prototype.incoming = function(message, callback) {
     outbox_message.message.retried = true;
     delete outbox_message.message.id;
     delete this._outbox[message.id];
-    this._client._send(outbox_message.message, callback);
+    this._client._sendMessage(outbox_message.message, {}, callback);
   }
   else
     callback(message);
