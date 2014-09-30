@@ -1,4 +1,6 @@
 ## 0.5.0
+ - Add support for faye 1.1 (unreleased for now)
+ - Drop support for faye < 1.1
  - More extensibility regarding public channels, extensions now take an options
    hash with a whitelist lambda / function that will be called with the channel
    name so developers can implement their own logic
