@@ -1,0 +1,10 @@
+image: ruby2.0.0
+cache:
+  - /tmp/bundler
+env:
+  - RAILS_ENV=test
+script:
+  - gem install bundler
+  - sudo chown ubuntu:ubuntu /tmp/bundler
+  - bundle install --path /tmp/bundler
+  - bundle exec rake
