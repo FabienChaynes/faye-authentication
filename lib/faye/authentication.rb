@@ -23,9 +23,12 @@ module Faye
 
     # Return signed payload or raise
     def self.decode(signature, secret)
-      payload, _ = JWT.decode(signature, secret) rescue raise(AuthError)
-      raise ExpiredError if Time.at(payload['exp'].to_i) < Time.now
+      payload, _ = JWT.decode(signature, secret)
       payload
+    rescue JWT::ExpiredSignature
+      raise ExpiredError
+    rescue
+      raise AuthError
     end
 
     # Return true if signature is valid and correspond to channel and clientId or raise
