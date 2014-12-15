@@ -1,5 +1,5 @@
 module Faye
   module Authentication
-    VERSION = "0.5.0"
+    VERSION = File.read(File.join(File.dirname(__FILE__),'..', '..', '..', 'VERSION') ).strip
   end
 end
