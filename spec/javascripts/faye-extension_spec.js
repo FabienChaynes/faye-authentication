@@ -35,7 +35,7 @@ describe('Faye extension', function() {
         var signature = jwtsign.serialize("macaroni");
 
         jasmine.Ajax.stubRequest('/faye/auth').andReturn({
-          'responseText': '{"signature": "' + signature + '"}'
+          'responseText': '{"signatures": [{"channel" : "/foobar", "clientId": "'+ self.client._dispatcher.clientId +'", "signature" : "' + signature + '"}]}'
         });
         callback();
       }, self.client);
@@ -56,20 +56,19 @@ describe('Faye extension', function() {
       var self = this;
       setTimeout(function() {
         var request = jasmine.Ajax.requests.mostRecent();
-        expect(request.data()['message[channel]'][0]).toBe('/foobar');
+        expect(request.data()['messages[0][channel]'][0]).toBe('/foobar');
         done();
       }, 500);
     });
-
 
     describe('signature', function() {
 
       beforeEach(function() {
         jasmine.Ajax.stubRequest('/faye/auth').andReturn({
-          'responseText': '{"signature": "foobarsignature"}'
+          'responseText': '{"signatures": [{"channel": "/foobar", "clientId": "1234", "signature": "foobarsignature"}]}'
         });
 
-        this.dispatcher = {connectionType: "fake", sendMessage: function() {}, selectTransport: function() { }};
+        this.dispatcher = {connectionType: "fake", clientId: '1234', sendMessage: function() {}, selectTransport: function() { }};
         spyOn(this.dispatcher, 'sendMessage');
         spyOn(this.dispatcher, 'selectTransport');
         Faye.extend(this.dispatcher, Faye.Publisher)
@@ -80,6 +79,7 @@ describe('Faye extension', function() {
 
         this.client.handshake(function() {
           self.client._dispatcher = self.dispatcher;
+
           self.client.subscribe('/foobar');
 
           setTimeout(function() {
@@ -118,8 +118,8 @@ describe('Faye extension', function() {
 
         this.client.handshake(function() {
           self.client._dispatcher = self.dispatcher;
-          self.client.publish('/foo', {text: 'hallo'});
-          self.client.subscribe('/foo');
+          self.client.publish('/foobar', {text: 'hallo'});
+          self.client.subscribe('/foobar');
 
           setTimeout(function() {
             var calls = self.dispatcher.sendMessage.calls.all();
@@ -127,7 +127,7 @@ describe('Faye extension', function() {
             var publish_call = calls[calls.length - 2];
             var subscribe_message = subscribe_call.args[0];
             var publish_message = publish_call.args[0];
-            expect(publish_message.channel).toBe('/foo');
+            expect(publish_message.channel).toBe('/foobar');
             expect(subscribe_message.channel).toBe('/meta/subscribe');
             expect(publish_message.signature).toBe('foobarsignature');
             expect(subscribe_message.signature).toBe('foobarsignature');
@@ -181,26 +181,73 @@ describe('Faye extension', function() {
     it('should make only one ajax call when dealing with one channel', function(done) {
       this.client.subscribe('/foobar');
       this.client.publish('/foobar', {text: 'hallo'});
-      this.client.publish('/foobar', {text: 'hallo'});
 
       setTimeout(function() {
         expect(jasmine.Ajax.requests.count()).toBe(2); // Handshake + auth * 1
         done();
       }, 500);
 
-    })
+    });
 
-    it('should make two ajax calls when dealing with two channels', function(done) {
+    it('should make two ajax calls when dealing with two channels in a not-so-short period', function(done) {
       this.client.subscribe('/foobar');
       this.client.publish('/foobar', {text: 'hallo'});
-      this.client.publish('/foobar', {text: 'hallo'});
 
-      this.client.subscribe('/bar');
-      this.client.publish('/bar', {text: 'hallo'});
-      this.client.publish('/bar', {text: 'hallo'});
+      var self = this;
 
       setTimeout(function() {
-        expect(jasmine.Ajax.requests.count()).toBe(3); // Handshake + auth * 2
+        self.client.subscribe('/bar');
+        self.client.publish('/bar', {text: 'hallo'});
+
+        setTimeout(function() {
+          expect(jasmine.Ajax.requests.count()).toBe(3); // Handshake + auth * 2
+          done();
+        }, 500);
+      }, 250);
+    });
+
+    it('should make two ajax calls when dealing with three channels and separating calls', function(done) {
+      this.client.subscribe('/foobar');
+      this.client.publish('/foobar', {text: 'hallo'});
+
+      var self = this;
+
+      setTimeout(function() {
+        self.client.subscribe('/bar');
+        self.client.publish('/bar', {text: 'hallo'});
+
+        self.client.subscribe('/baz');
+        self.client.publish('/baz', {text: 'hallo'});
+
+        setTimeout(function() {
+          expect(jasmine.Ajax.requests.count()).toBe(3); // Handshake + auth * 2
+          var first_auth = jasmine.Ajax.requests.at(1);
+          var second_auth = jasmine.Ajax.requests.at(2);
+          expect(first_auth.data()['messages[0][channel]'][0]).toBe('/foobar');
+          expect(first_auth.data()['messages[1]']).toBe(undefined);
+
+          expect(second_auth.data()['messages[0][channel]'][0]).toBe('/bar');
+          expect(second_auth.data()['messages[1][channel]'][0]).toBe('/baz');
+          done();
+        }, 500);
+      }, 250);
+    });
+
+    it('should make only one ajax calls when subscribing several times in a short period', function(done) {
+      var self = this;
+      this.client.subscribe('/foobar');
+      setTimeout(function() {
+        self.client.subscribe('/foobar2');
+        setTimeout(function() {
+          self.client.subscribe('/foobar3');
+        }, 50)
+      }, 50);
+      setTimeout(function() {
+        expect(jasmine.Ajax.requests.count()).toBe(2); // Handshake + auth
+        var request = jasmine.Ajax.requests.mostRecent();
+        expect(request.data()['messages[0][channel]'][0]).toBe('/foobar');
+        expect(request.data()['messages[1][channel]'][0]).toBe('/foobar2');
+        expect(request.data()['messages[2][channel]'][0]).toBe('/foobar3');
         done();
       }, 500);
     });
@@ -227,19 +274,19 @@ describe('Faye extension', function() {
         var request = jasmine.Ajax.requests.mostRecent();
         var params = queryString.parse(request.params);
 
-        var jwtsign_bad   = new jwt.WebToken('{"clientId": "' + params['message[clientId]'] + '", "channel": "/foo", "exp": 1}', '{"alg": "HS256"}');
+        var jwtsign_bad   = new jwt.WebToken('{"clientId": "' + params['messages[0][clientId]'] + '", "channel": "/foo", "exp": 1}', '{"alg": "HS256"}');
         var signature_bad = jwtsign_bad.serialize("macaroni");
 
-        var jwtsign_good   = new jwt.WebToken('{"clientId": "' + params['message[clientId]'] + '", "channel": "/foo", "exp": 2803694528}', '{"alg": "HS256"}');
+        var jwtsign_good   = new jwt.WebToken('{"clientId": "' + params['messages[0][clientId]'] + '", "channel": "/foo", "exp": 2803694528}', '{"alg": "HS256"}');
         var signature_good = jwtsign_good.serialize("macaroni");
 
         request.response({
           'status' : 200,
-          'responseText': '{"signature": "' + signature_bad + '"}'
+          'responseText': '{"signatures": [{"channel": "/foo", "clientId": "'+ params['messages[0][clientId]'] +'", "signature":  "' + signature_bad + '"}]}'
         });
 
         jasmine.Ajax.stubRequest('/faye/auth').andReturn({
-          'responseText': '{"signature": "' + signature_good + '"}'
+          'responseText': '{"signatures": [{"channel": "/foo", "clientId": "'+ params['messages[0][clientId]'] +'", "signature":  "' + signature_good + '"}]}'
         });
 
       }, 1000);

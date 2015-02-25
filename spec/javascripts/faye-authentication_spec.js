@@ -110,4 +110,5 @@ describe('faye-authentication', function() {
     });
 
   });
+
 });

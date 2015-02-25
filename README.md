@@ -8,10 +8,9 @@ This project implements (channel,client_id) authentication on channel subscripti
 
 On channel subscription the JS client performs an Ajax Call to an HTTP endpoint to be granted a signature that will be provided to Faye Server to connect and publish to channel. The authentication of the endpoint itself is up to you but in the general case this will be a session authenticated resource of your app and you will decide to provide the signature or not depending on your own business logic.
 
-This signature is required and valid for each channel and client id tupple and rely on JWT for security.
+This signature is required for each channel and client id tupple and relies on JWT for security. The Faye server will verify the (channel,client_id) tupple signature and reject the message if the signature is incorrect or not present.
 
-The Faye server will verify the (channel,client_id) tupple signature and reject the message if the signature
-is incorrect or not present.
+If the browser needs multiple signatures (for multiple channels), they'll automatically be batched together into one signature HTTP request to your server.
 
 ## Current support
 
@@ -40,25 +39,30 @@ Or install it yourself as:
 
 ### Channels requiring authentication
 
-All channels require authentication by default, however, it is possible to provide
-a lambda to the faye extensions to let them know which channels are public.
+All channels require authentication by default, however, it is possible to provide a lambda to the faye extensions to let them know which channels are public.
 
 ### Authentication endpoint requirements
 
-The endpoint will receive a POST request, and shall return a JSON hash with a ``signature`` key.
+The endpoint will receive a POST request with one or more channels, and shall return a JSON document with the signatures.
 
 The parameters sent to the endpoint are the following :
 
 ```json
 {
-    "message" : {
-        "channel": "/foo/bar",
+    "messages": {
+      "0": {
+        "channel": "/foo",
         "clientId": "123abc"
+      },
+      "1": {
+        "channel": "/bar",
+        "clientId": "123abc"
+      }
     }
 }
 ```
 
-If the endpoint returns an error, the message won't be signed and the server will reject it.
+If the endpoint returns an error, the messages won't be signed and the server will reject them.
 
 You can use ``Faye::Authentication.sign`` to generate the signature from the message and a private key.
 
@@ -66,17 +70,19 @@ Example (For a Rails application)
 
 ```ruby
 def auth
-  if current_user.can?(:read, params[:message][:channel])
-    render json: {signature: Faye::Authentication.sign(params[:message].slice(:channel,:clientId), 'your shared secret key')}
-  else
-    render json: {error: 'Not authorized'}, status: 403
+  response = params[:messages].values.map do |message|
+    if current_user.can?(:read, message[:channel])
+      message.merge(signature: Faye::Authentication.sign(message, FAYE_CONFIG['secret']))
+    else
+      message.merge(error: 'Forbidden')
+    end
   end
+  render json: {signatures: response}
 end
 
 ```
 
-A Ruby HTTP Client is also available for publishing messages to your faye server
-without the hassle of using EventMachine :
+A Ruby HTTP Client is also available for publishing messages to your faye server without the hassle of using EventMachine :
 
 ```ruby
 Faye::Authentication::HTTPClient.publish('http://localhost:9290/faye', '/channel', 'data', 'your private key')
@@ -128,9 +134,7 @@ Faye::Authentication::ServerExtension expect that :
 
 Otherwise Faye Server will refuse the message.
 
-If you want to specify some channels for which you don't want the extension require
-authentication, you can pass an options hash with a ``whitelist`` key mapping
-to a lambda :
+If you want to specify some channels for which you don't want the extension require authentication, you can pass an options hash with a ``whitelist`` key mapping to a lambda :
 
 ````ruby
 channel_whitelist = lambda do |channel|
