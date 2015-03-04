@@ -12,6 +12,16 @@ describe('faye-authentication', function() {
       expect(auth.endpoint()).toBe('/custom');
     });
 
+    it('sets a retry delay by default', function() {
+      var auth = new FayeAuthentication(new Faye.Client('http://example.com'));
+      expect(auth._options.retry_delay).toBe(1000);
+    });
+
+    it('allows to specify a custom retry delay', function() {
+      var auth = new FayeAuthentication(new Faye.Client('http://example.com'), null, {retry_delay: 500});
+      expect(auth._options.retry_delay).toBe(500);
+    });
+
   });
 
   describe('authentication_required', function() {
