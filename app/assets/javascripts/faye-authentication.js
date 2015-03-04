@@ -31,6 +31,11 @@ FayeAuthentication.prototype.resolveWaitingSignatures = function() {
       var signature = $.grep(response.signatures || [], function(e) {
         return (e.channel == params.channel && e.clientId == params.clientId);
       })[0];
+      if (typeof signature === 'undefined') {
+        self.error('No signature found in ajax reply for channel ' + params.channel + ' and clientId ' + params.clientId);
+      } else if (signature && !signature.signature) {
+        self.error('Error when fetching signature for channel ' + params.channel + ' and clientId ' + params.clientId + ', error was : "' + signature.error + '"');
+      }
       Faye.Promise.resolve(self._signatures[params.clientId][params.channel], signature ? signature.signature : null);
     });
   }, 'json').fail(function(xhr, textStatus, e) {
