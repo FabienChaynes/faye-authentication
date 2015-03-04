@@ -24,7 +24,7 @@ describe('Faye extension', function() {
 
   describe('With extension', function() {
     beforeEach(function() {
-      this.extension = new FayeAuthentication(this.client);
+      this.extension = new FayeAuthentication(this.client, null, {retry_delay: 100});
       this.client.addExtension(this.extension);
     });
 
@@ -252,7 +252,7 @@ describe('Faye extension', function() {
       }, 500);
     });
 
-    it('tries to get a new signature immediately when the used signature is bad or expired', function(done) {
+    it('tries to get a new signature when the used signature is bad or expired', function(done) {
       jasmine.Ajax.stubRequest('/faye/auth').andReturn({
         'responseText': '{"signature": "bad"}'
       });
@@ -261,6 +261,31 @@ describe('Faye extension', function() {
         expect(jasmine.Ajax.requests.count()).toBe(3); // Handshake + auth * 2
         done();
       });
+    });
+
+    it('retries for the signature after a configured delay', function(done) {
+      jasmine.Ajax.stubRequest('/faye/auth').andReturn({
+        'responseText': '{"signature": "bad"}'
+      });
+      var self = this;
+      var finished = false;
+      this.client.subscribe('/toto').then(undefined, function() {
+        finished = true;
+      });
+
+      setTimeout(function() {
+
+        // Initial 200ms batching delay
+
+        setTimeout(function() {
+          expect(finished).toBe(false);
+        }, 200 + 80); // 2nd Batching delay + 80 ms
+
+        setTimeout(function() {
+          expect(finished).toBe(true);
+          done();
+        }, 200 + 200); // 2nd Batching delay + 200 ms
+      }, 200);
     });
 
     it('calls the success callback for a successfully retried message', function(done) {

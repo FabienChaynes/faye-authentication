@@ -4,6 +4,7 @@ function FayeAuthentication(client, endpoint, options) {
   this._signatures = {};
   this._outbox = {};
   this._options = options || {};
+  this._options.retry_delay = this._options.retry_delay || 1000;
   this._waiting_signatures = [];
   this._timer = null;
 }
@@ -110,7 +111,10 @@ FayeAuthentication.prototype.incoming = function(message, callback) {
     outbox_message.message.retried = true;
     delete outbox_message.message.id;
     delete this._outbox[message.id];
-    this._client._sendMessage(outbox_message.message, {}, callback);
+    var self = this;
+    setTimeout(function() {
+      self._client._sendMessage(outbox_message.message, {}, callback);
+    }, this._options.retry_delay);
   } else {
     callback(message);
   }
