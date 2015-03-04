@@ -118,6 +118,14 @@ client.addExtension(new FayeAuthentication(client, '/faye/auth', {whitelist: cha
 ````
 
 
+Faye-authentication will retry each signatures request once if the first attempt failed or returned an invalid signature. The default retry delay is 1000 ms, so 1 second.
+It can be configured :
+
+````javascript
+client.addExtension(new FayeAuthentication(client, '/faye/auth', {retry_delay: 200})); // 200 ms retry delay
+````
+
+
 ### Ruby Faye server extension
 
 Instanciate the extension with your secret key and add it to the server :
