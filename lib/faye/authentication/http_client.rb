@@ -6,7 +6,7 @@ module Faye
 
       def self.publish(url, channel, data, key)
         uri = URI(url)
-        req = Net::HTTP::Post.new(uri.path)
+        req = Net::HTTP::Post.new(uri.request_uri)
         message = {'channel' => channel, 'clientId' => 'http'}
         message['signature'] = Faye::Authentication.sign(message, key)
         message['data'] = data
