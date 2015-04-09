@@ -1,3 +1,8 @@
+## 1.8.1
+  - Fix bad parameter passed to Net::HTTP::Post in HTTP Client (thanks @evserykh)
+## 1.8.0
+ - Wait a delay before trying to fetch a signature after an error
+
 ## 1.7.0
  - Improve preformance by batching authentication requests (backward incompatible!)
 
