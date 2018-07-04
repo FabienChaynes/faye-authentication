@@ -7,11 +7,7 @@ function FayeAuthentication(client, endpoint, options) {
   this._options.retry_delay = this._options.retry_delay || 1000;
   this._waiting_signatures = [];
   this._timer = null;
-  this.logger = {
-    error: function(message) {
-      // NOOP
-    }
-  }
+  this.logger = Faye.logger;
 }
 
 FayeAuthentication.prototype.endpoint = function() {
