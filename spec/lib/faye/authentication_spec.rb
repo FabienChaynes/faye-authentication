@@ -95,6 +95,10 @@ describe Faye::Authentication do
       it 'returns false if lambda returns true' do
         expect(Faye::Authentication.authentication_required?(message, {whitelist: lambda { |message| true }})).to be(false)
       end
+
+      it 'returns false if channel is nil' do
+        expect(Faye::Authentication.authentication_required?('clientId' => clientId, 'text' => 'whatever')).to be(false)
+      end
     end
 
     shared_examples 'meta_except_subscribe' do
