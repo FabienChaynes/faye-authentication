@@ -26,6 +26,7 @@ module Faye
               end
             debug("Authentication failed: #{message['error']}")
           end
+          message.delete('signature')
         end
         callback.call(message)
       end

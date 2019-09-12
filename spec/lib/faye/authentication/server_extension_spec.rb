@@ -33,6 +33,11 @@ describe Faye::Authentication::ServerExtension do
         context 'with signature' do
           before { message['signature'] = Faye::Authentication.sign(message.merge({'channel' => channel}), secret) }
           it_should_behave_like 'signature_has_no_error'
+
+          it 'removes the signature in the response' do
+            subject
+            expect(@result).not_to have_key('signature')
+          end
         end
 
         context 'without signature' do
