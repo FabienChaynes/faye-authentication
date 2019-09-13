@@ -1,5 +1,12 @@
+## 1.11.0
+  - Optional authentication for `Faye::Authentication::HTTPClient` (#12)
+
+## 1.10.0
+  - Remove signature from the server response (#11)
+
 ## 1.8.1
   - Fix bad parameter passed to Net::HTTP::Post in HTTP Client (thanks @evserykh)
+
 ## 1.8.0
  - Wait a delay before trying to fetch a signature after an error
 
