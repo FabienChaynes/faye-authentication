@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["adrien.siami@dimelo.com"]
   spec.summary       =
   spec.description   = "A faye extension to add authentication mechanisms"
-  spec.homepage      = "https://github.com/dimelo/faye-authentication"
+  spec.homepage      = "https://github.com/jarthod/faye-authentication"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
