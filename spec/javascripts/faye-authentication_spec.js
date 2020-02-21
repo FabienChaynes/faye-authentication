@@ -27,8 +27,8 @@ describe('faye-authentication', function() {
   describe('authentication_required', function() {
 
     beforeEach(function() {
+      Faye.logger = {error: function() {}};
       this.auth = new FayeAuthentication(new Faye.Client('http://example.com'));
-      Faye.logger = null;
     });
 
     function sharedExamplesForSubscribeAndPublish() {
@@ -45,7 +45,6 @@ describe('faye-authentication', function() {
 
       it('logs error if the function throws', function() {
         this.auth._options.whitelist = function(message) { throw new Error("boom"); }
-        Faye.logger = {error: function() {}};
         spyOn(Faye.logger, 'error');
         this.auth.authentication_required(this.message);
         expect(Faye.logger.error).toHaveBeenCalledWith('[Faye] Error caught when evaluating whitelist function : boom');

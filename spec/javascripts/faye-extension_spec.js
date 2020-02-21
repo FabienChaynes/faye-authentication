@@ -1,5 +1,6 @@
 describe('Faye extension', function() {
   beforeEach(function() {
+    Faye.logger = {error: function() {}};
     this.client = new Faye.Client('http://localhost:9296/faye');
     jasmine.Ajax.install();
   });
@@ -10,13 +11,15 @@ describe('Faye extension', function() {
 
   describe('Without extension', function() {
     it('fails to subscribe', function(done) {
-      this.client.subscribe('/foobar').then(undefined, function() {
+      this.client.subscribe('/foobar').then(undefined, function(e) {
+        expect(e.message).toBe('Invalid signature')
         done();
       });
     });
 
     it('fails to publish', function(done) {
-      this.client.publish('/foobar', {text: 'whatever'}).then(undefined, function() {
+      this.client.publish('/foobar', {text: 'whatever'}).then(undefined, function(e) {
+        expect(e.message).toBe('Invalid signature')
         done();
       });
     });
@@ -71,7 +74,6 @@ describe('Faye extension', function() {
         this.dispatcher = {connectionType: "fake", clientId: '1234', sendMessage: function() {}, selectTransport: function() { }};
         spyOn(this.dispatcher, 'sendMessage');
         spyOn(this.dispatcher, 'selectTransport');
-        Faye.extend(this.dispatcher, Faye.Publisher)
       });
 
       it('should add the signature to subscribe message', function(done) {

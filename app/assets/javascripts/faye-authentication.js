@@ -34,14 +34,14 @@ FayeAuthentication.prototype.resolveWaitingSignatures = function() {
         return (e.channel == params.channel && e.clientId == params.clientId);
       })[0];
       if (typeof signature === 'undefined') {
-        self.logger.error('No signature found in ajax reply for channel ' + params.channel + ' and clientId ' + params.clientId);
+        self.logger.error('[Faye] No signature found in ajax reply for channel ' + params.channel + ' and clientId ' + params.clientId);
       } else if (signature && !signature.signature) {
-        self.logger.error('Error when fetching signature for channel ' + params.channel + ' and clientId ' + params.clientId + ', error was : "' + signature.error + '"');
+        self.logger.error('[Faye] Error when fetching signature for channel ' + params.channel + ' and clientId ' + params.clientId + ', error was : "' + signature.error + '"');
       }
       FayeAuthentication.Promise.resolve(self._signatures[params.clientId][params.channel], signature ? signature.signature : null);
     });
   }, 'json').fail(function(xhr, textStatus, e) {
-    self.logger.error('Failure when trying to fetch JWT signature for data "' + JSON.stringify(messages) + '", error was : ' + textStatus);
+    self.logger.error('[Faye] Failure when trying to fetch JWT signature for data "' + JSON.stringify(messages) + '", error was : ' + textStatus);
     $.each(messages, function(key, params) {
       FayeAuthentication.Promise.resolve(self._signatures[params.clientId][params.channel], null);
     });
@@ -96,7 +96,7 @@ FayeAuthentication.prototype.authentication_required = function(message) {
       try {
         return (!this._options.whitelist(subscription_or_channel));
       } catch (e) {
-        this.logger.error("Error caught when evaluating whitelist function : " + e.message);
+        this.logger.error("[Faye] Error caught when evaluating whitelist function : " + e.message);
       }
     }
     return (true);
