@@ -1,4 +1,4 @@
-## 1.12.0
+## 1.12
   - No longer retry and fetch a new signature after errors unrelated to `Faye::Authentication` (#15)
   - Internal:
     - Fix rspec and jasmine specs (#14)

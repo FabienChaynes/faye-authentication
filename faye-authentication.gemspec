@@ -6,8 +6,8 @@ require 'faye/authentication/version'
 Gem::Specification.new do |spec|
   spec.name          = "faye-authentication"
   spec.version       = Faye::Authentication::VERSION
-  spec.authors       = ["Adrien Siami"]
-  spec.email         = ["adrien.siami@dimelo.com"]
+  spec.authors       = ["Adrien Siami", "Adrien Rey-Jarthon", "Cyril Le Roy", "Fabien Chaynes"]
+  spec.email         = ["adrien.siami@gmail.com", "jobs@adrienjarthon.com", "cyril.leroy44@gmail.com", "fabien.chaynes@ringcentral.com"]
   spec.summary       =
   spec.description   = "A faye extension to add authentication mechanisms"
   spec.homepage      = "https://github.com/jarthod/faye-authentication"
@@ -21,13 +21,13 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'jwt', '>= 1.2'
   spec.add_runtime_dependency 'faye', '>= 1.0'
 
-  spec.add_development_dependency "bundler", "~> 1.5"
-  spec.add_development_dependency "rake", '~> 10.3'
-  spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rspec-eventmachine', '~> 0.2'
-  spec.add_development_dependency 'jasmine', '~> 3.0'
+  spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'rspec-eventmachine'
+  spec.add_development_dependency 'jasmine'
   spec.add_development_dependency 'chrome_remote'
-  spec.add_development_dependency 'rack', '~> 1.5'
-  spec.add_development_dependency 'thin', '~> 1.6'
-  spec.add_development_dependency 'webmock', '~> 3.8.1'
+  spec.add_development_dependency 'rack'
+  spec.add_development_dependency 'thin'
+  spec.add_development_dependency 'webmock'
 end
