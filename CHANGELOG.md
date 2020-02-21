@@ -1,3 +1,10 @@
+## 1.12.0
+  - No longer retry and fetch a new signature after errors unrelated to `Faye::Authentication` (#15)
+  - Internal:
+    - Fix rspec and jasmine specs (#14)
+    - Replace `phantomjs` with `chromeheadless` for jasmine specs (#14)
+    - Updated Travis settings with last ruby versions (#14)
+
 ## 1.11.0
   - Optional authentication for `Faye::Authentication::HTTPClient` (#12)
 

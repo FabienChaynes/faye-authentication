@@ -320,5 +320,44 @@ describe('Faye extension', function() {
 
     });
 
+    it('does not retry if the error is unrelated to authentication', function(done) {
+      other_client = new Faye.Client('http://localhost:9296/faye');
+      auth_extension = new FayeAuthentication(other_client, null, { retry_delay: 100 });
+      tweak_extension = {
+        incoming: function(message, callback) {
+          console.log('message',message)
+          if (message.error) {
+            message.error = 'Not an Authentication error';
+          }
+          callback(message);
+        }
+      }
+      other_client.addExtension(tweak_extension);
+      other_client.addExtension(this.extension);
+
+      jasmine.Ajax.stubRequest('/faye/auth').andReturn({
+        'responseText': '{"signature": "bad"}'
+      });
+
+      var finished = false;
+      other_client.subscribe('/toto').then(undefined, function() {
+        finished = true;
+      });
+
+      setTimeout(function() {
+
+        // Initial 200ms batching delay
+
+        setTimeout(function() {
+          expect(finished).toBe(true);
+        }, 200 + 80); // 2nd Batching delay + 80 ms
+
+        setTimeout(function() {
+          expect(finished).toBe(true);
+          done();
+        }, 200 + 200); // 2nd Batching delay + 200 ms
+      }, 200);
+    });
+
   });
 });

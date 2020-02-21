@@ -8,6 +8,7 @@ function FayeAuthentication(client, endpoint, options) {
   this._waiting_signatures = [];
   this._timer = null;
   this.logger = Faye.logger;
+  this.ERROR_LIST = ['Expired signature', 'Required argument not signed', 'Invalid signature']
 }
 
 FayeAuthentication.prototype.endpoint = function() {
@@ -106,7 +107,7 @@ FayeAuthentication.prototype.authentication_required = function(message) {
 
 FayeAuthentication.prototype.incoming = function(message, callback) {
   var outbox_message = this._outbox[message.id];
-  if (outbox_message && message.error) {
+  if (outbox_message && message.error && this.ERROR_LIST.indexOf(message.error) != -1) {
     var channel = outbox_message.message.subscription || outbox_message.message.channel;
     this._signatures[outbox_message.clientId][channel] = null;
     outbox_message.message.retried = true;
