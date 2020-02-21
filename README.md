@@ -1,4 +1,4 @@
-# Faye::Authentication [![Build Status](https://travis-ci.org/dimelo/faye-authentication.svg?branch=master)](https://travis-ci.org/dimelo/faye-authentication) [![Code Climate](https://codeclimate.com/github/dimelo/faye-authentication.png)](https://codeclimate.com/github/dimelo/faye-authentication)
+# Faye::Authentication [![Build Status](https://travis-ci.org/jarthod/faye-authentication.svg?branch=master)](https://travis-ci.org/dimelo/faye-authentication)
 
 Authentification implementation for faye
 
