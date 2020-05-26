@@ -1,3 +1,6 @@
+## 1.13
+  - Fix [CVE-2020-11020](https://github.com/faye/faye/security/advisories/GHSA-qpg4-4w7w-2mq5)
+
 ## 1.12
   - No longer retry and fetch a new signature after errors unrelated to `Faye::Authentication` (#15)
   - Internal:
