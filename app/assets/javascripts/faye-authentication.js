@@ -92,7 +92,7 @@ FayeAuthentication.prototype.outgoing = function(message, callback) {
 
 FayeAuthentication.prototype.authentication_required = function(message) {
   var subscription_or_channel = message.subscription || message.channel;
-  if (message.channel == '/meta/subscribe' || message.channel.lastIndexOf('/meta/', 0) !== 0) {
+  if (message.channel.lastIndexOf('/meta/subscribe') === 0 || message.channel.lastIndexOf('/meta/', 0) !== 0) {
     if(this._options.whitelist) {
       try {
         return (!this._options.whitelist(subscription_or_channel));

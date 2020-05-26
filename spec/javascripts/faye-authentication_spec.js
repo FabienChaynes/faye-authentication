@@ -94,6 +94,14 @@ describe('faye-authentication', function() {
       sharedExamplesForSubscribeAndPublish();
     });
 
+    describe('subscribe with prefix', function() {
+      beforeEach(function() {
+        this.message = {'channel': '/meta/subscribe/x', 'subscription': '/foobar'};
+      });
+
+      sharedExamplesForSubscribeAndPublish();
+    });
+
     describe('handshake', function() {
       beforeEach(function() {
         this.message = {'channel': '/meta/handshake'};

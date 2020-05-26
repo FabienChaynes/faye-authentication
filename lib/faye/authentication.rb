@@ -42,7 +42,7 @@ module Faye
     def self.authentication_required?(message, options = {})
       subscription_or_channel = message['subscription'] || message['channel']
       return false if message['channel'].nil?
-      return false unless (message['channel'] == '/meta/subscribe' || (!(message['channel'].start_with?('/meta/'))))
+      return false unless (message['channel'].start_with?('/meta/subscribe') || (!(message['channel'].start_with?('/meta/'))))
       whitelist_proc = options[:whitelist]
       if whitelist_proc
         begin

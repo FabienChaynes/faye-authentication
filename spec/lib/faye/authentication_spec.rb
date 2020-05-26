@@ -132,6 +132,11 @@ describe Faye::Authentication do
       it_behaves_like 'subscribe_and_publish'
     end
 
+    context 'subscribe with prefix' do
+      let(:message) { {'channel' => '/meta/subscribe/x', 'subscription' => '/foobar'} }
+      it_behaves_like 'subscribe_and_publish'
+    end
+
     context 'handshake' do
       let(:message) { {'channel' => '/meta/handshake'} }
       it_behaves_like 'meta_except_subscribe'
