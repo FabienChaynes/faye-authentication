@@ -183,7 +183,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           {"Content-type": response.contentType || "application/json" };
 
         this.onload();
-        this.onreadystatechange();
+        if (typeof this.onreadystatechange === "function") {
+          this.onreadystatechange();
+        }
       },
 
       responseTimeout: function() {
