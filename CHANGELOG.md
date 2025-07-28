@@ -1,3 +1,6 @@
+## 1.14
+  - Bump jQuery (used in specs) to v3.7.1
+
 ## 1.13
   - Fix [CVE-2020-11020](https://github.com/faye/faye/security/advisories/GHSA-qpg4-4w7w-2mq5)
 
